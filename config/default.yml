@@ -1,0 +1,17 @@
+app:
+  addr: ":3456"
+  prefix: "/api"
+mongodb:
+  host: "127.0.0.1"
+  username: "carrot"
+  password: "123"
+  database: "carrot"
+qqbot:
+  #host: "http://106.52.43.175:5700"
+  host: "http://127.0.0.1:5700"
+qq:
+  admin: 2039799616
+  group: 923300200
+weather:
+  host: "https://api.seniverse.com/v3/weather/daily.json"
+  token: "SRw2t5tNFjmvTEkF2"
