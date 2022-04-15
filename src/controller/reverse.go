@@ -11,6 +11,7 @@ import (
 	"bug-carrot/util/context"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"io/ioutil"
 	"net/http"
@@ -133,7 +134,9 @@ func groupMessageHandler(c echo.Context) error {
 	}
 
 	recordGroupMessage(req.GroupId, userId, req.RawMessage) // 记录x
-	if !strings.HasPrefix(req.RawMessage, `卡洛`) {
+
+	prefixAt := fmt.Sprintf("[CQ:at,qq=%d]", config.C.QQBot.Bot)
+	if !strings.HasPrefix(req.RawMessage, prefixAt) {
 		return context.Success(c, http.StatusOK)
 	}
 

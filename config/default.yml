@@ -9,6 +9,8 @@ mongodb:
 qqbot:
   #host: "http://106.52.43.175:5700"
   host: "http://127.0.0.1:5700"
+  bot: 927207059
+  #bot: 2919327775
 qq:
   admin: 2039799616
   group: 923300200

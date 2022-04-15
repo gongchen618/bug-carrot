@@ -33,6 +33,7 @@ type app struct {
 
 type qqbot struct {
 	Host string `yaml:"host"`
+	Bot  int64  `yaml:"bot"`
 }
 
 type qq struct {

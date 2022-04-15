@@ -15,15 +15,15 @@ var (
 	CarrotFriendNotAdmin = "妈妈说不可以跟陌生人说话!"
 
 	CarrotGroupPuzzled           = "你好谢谢小笼包再见！"
-	CarrotGroupGoodMorningFirst  = "早安早安!!你今天看起来好不错呀!祝你拥有美好的一天~"
-	CarrotGroupGoodMorning       = "你也早安~"
+	CarrotGroupGoodMorningFirst  = "早安早安!!悄悄告诉你,你是今天第一个和卡洛说早安的人哦~"
+	CarrotGroupGoodMorning       = "你也早安!开启元气满满的一天吧!"
 	CarrotGroupGoodMorningRepeat = "如果要一直说早安,卡洛就没空吃早餐啦!"
 	CarrotGroupGoodMorningCheat  = "你你你你居然现在才起床嘛?!实在是太猪猪啦!"
-	CarrotGroupGoodNightFirst    = "哇你睡得好早!卡洛的夜生活才刚刚开始诶!"
+	CarrotGroupGoodNightFirst    = "哇第一个和卡洛说晚安的人出现了!卡洛好开心~"
 	CarrotGroupGoodNight         = "晚安安~要做个好梦哦"
 	CarrotGroupGoodNightRepeat   = "已经和卡洛说过晚安啦!快去睡吧!"
 	CarrotGroupGoodNightCheat    = "确定要现在跟卡洛说晚安吗?说谎的人鼻子可是会变长的哦!"
-	//CarrotGroupGoodNightButChat  = "诶!你不是和卡洛说过晚安了嘛!!原来是骗卡洛的吗!卡洛好伤心..."
+	CarrotGroupGoodNightButChat  = "怎么和卡洛说过晚安了还不去睡觉!原来是骗卡洛的吗...卡洛好伤心..."
 
 	CarrotGroupCarrot = "卡洛最喜欢萝卜啦!"
 

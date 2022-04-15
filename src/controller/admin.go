@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/constant"
 	"bug-carrot/controller/param"
 	"bug-carrot/model"
 	"bug-carrot/util"
+	"fmt"
 )
 
 func solveAdminHomeworkDeleteMessage(id int64, subject string, context string) {
@@ -23,6 +25,7 @@ func solveAdminHomeworkDeleteMessage(id int64, subject string, context string) {
 	}
 
 	util.QQSend(id, constant.CarrotHomeworkDeleteSuccess)
+	util.QQGroupSend(config.C.QQ.Group, fmt.Sprintf("删除作业 %s %s", subject, context))
 }
 
 func solveAdminHomeworkShowMessage(id int64) {
@@ -45,4 +48,5 @@ func solveAdminHomeworkAddMessage(id int64, subject string, context string) {
 	}
 
 	util.QQSend(id, constant.CarrotHomeworkAddSuccess)
+	util.QQGroupSend(config.C.QQ.Group, fmt.Sprintf("新增作业 %s %s", subject, context))
 }
