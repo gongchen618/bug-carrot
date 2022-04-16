@@ -49,6 +49,11 @@ type weather struct {
 func init() {
 	configFile := "config/default.yml"
 
+	// 如果设置了
+	if v, ok := os.LookupEnv("CONFIG"); ok {
+		configFile = "config/" + v + ".yml"
+	}
+
 	configFilePath := ""
 	p, err := os.Getwd()
 	if err != nil {

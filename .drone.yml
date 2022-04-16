@@ -1,0 +1,88 @@
+kind: pipeline
+type: docker
+name: default
+
+clone:
+  disable: true
+
+steps:
+  - name: linter
+    image: golangci/golangci-lint:v1.42.1
+    environment:
+      GO111MODULE: on
+      GOPROXY: https://goproxy.cn,direct
+      GOPATH: /tmp/gopath
+    volumes:
+      - name: gopath
+        path: /tmp/gopath
+    commands:
+      - cd src
+      - go get
+      - golangci-lint run --timeout=10m
+
+  - name: test
+    image: golang:1.16-alpine3.15
+    environment:
+      GO111MODULE: on
+      GOPROXY: https://goproxy.cn,direct
+      CGO_ENABLED: 1
+      CONFIG: prod
+    commands:
+      - apk add build-base
+      - cd src
+      - go get
+      - go build -o ../app
+      - chmod +x ../app
+
+  - name: build_prod
+    image: plugins/docker
+    when:
+      event:
+        - push
+    settings:
+      username:
+        from_secret: docker_user
+      password:
+        from_secret: docker_pass
+      dockerfile: ./Dockerfile
+      repo: ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      tags:
+        - ${DRONE_TAG}-${DRONE_COMMIT_SHA:0:8}
+        - latest
+
+  - name: scp_files
+    image: appleboy/drone-scp
+    when:
+      event:
+        - push
+    settings:
+      host:
+        from_secret: tencent_host
+      username:
+        from_secret: tencent_username
+      password:
+        from_secret: tencent_secret
+      port: 22
+      target: /mnt/var/www/drone/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      source: ./
+
+  - name: deploy_dev
+    image: appleboy/drone-ssh
+    when:
+      event:
+        - push
+    settings:
+      host:
+        from_secret: tencent_host
+      username:
+        from_secret: tencent_username
+      password:
+        from_secret: tencent_secret
+      port: 22
+      script:
+        - cd /mnt/var/www/drone/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+        - docker pull ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_TAG}-${DRONE_COMMIT_SHA:0:8}
+        - docker stop bug-carrot
+        - docker container rm bug-carrot
+        - docker run -d --network host --name bug-carrot ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_TAG}-${DRONE_COMMIT_SHA:0:8}
+

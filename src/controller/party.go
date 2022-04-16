@@ -97,19 +97,21 @@ func recordGroupMessage(groupId int64, userId int64, message string) {
 	messageRecorded[0] = message
 
 	//check good night
-	userDay, flag := goodNightUserDay[userId]
-	if flag && userDay == time.Now().Day() {
-		userTim, flag := goodNightCheck[userId]
-		if !flag {
-			userTim = 0
-		}
-		userTim = userTim + 1
-		if userTim%5 != 0 {
-			util.QQGroupSend(groupId, fmt.Sprintf("[CQ:poke,qq=%d]", userId))
-		} else {
-			util.QQGroupBan(groupId, userId, userTim/5)
-			util.QQGroupSendAtSomeone(groupId, userId, constant.CarrotGroupGoodNightButChat)
-		}
-		goodNightCheck[userId] = userTim
-	}
+	//userDay, flag := goodNightUserDay[userId]
+	//if flag && userDay == time.Now().Day() {
+	//	userTim, flag := goodNightCheck[userId]
+	//	if !flag {
+	//		userTim = 0
+	//	}
+	//	userTim = userTim + 1
+	//	if userTim%7 != 0 {
+	//		if userTim%3 == 0 {
+	//			util.QQGroupSend(groupId, fmt.Sprintf("[CQ:poke,qq=%d]", userId))
+	//		}
+	//	} else {
+	//		util.QQGroupBan(groupId, userId, userTim/7)
+	//		util.QQGroupSendAtSomeone(groupId, userId, constant.CarrotGroupGoodNightButChat)
+	//	}
+	//	goodNightCheck[userId] = userTim
+	//}
 }
