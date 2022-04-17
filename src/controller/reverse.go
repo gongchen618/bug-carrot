@@ -62,28 +62,19 @@ func QQReverseHTTPMiddleHandler(c echo.Context) error {
 	return context.Success(c, nil)
 }
 
-//func friendAddRequestHandler(c echo.Context) error {
-//	req := param.RequestQQFriendAdd{}
-//	if err := c.Bind(&req); err != nil {
-//		logrus.WithFields(logrus.Fields{"err": err.Error()}).Info("bind failed")
-//		return context.Error(c, http.StatusBadRequest, "bad request", err)
-//	}
-//
-//	// approve friend add request
-//	err := util.QQApproveFriendAddRequest(req.Flag)
-//	if err != nil {
-//		logrus.WithFields(logrus.Fields{"err": err.Error()}).Info("approve friend add request failed")
-//		return context.Error(c, http.StatusInternalServerError, "can't approve", err)
-//	}
-//
-//	// send hello message
-//	err = util.QQSend(req.UserId, BotHelloString)
-//	if err != nil {
-//		logrus.WithFields(logrus.Fields{"err": err.Error()}).Info("send message failed")
-//		return context.Error(c, http.StatusInternalServerError, "can't send message", err)
-//	}
-//	return context.Success(c, nil)
-//}
+func friendAddRequestHandler(c echo.Context) error {
+	req := param.RequestQQFriendAdd{}
+	if err := c.Bind(&req); err != nil {
+		util.ErrorPrint(err, nil, "bind failed")
+		return context.Error(c, http.StatusBadRequest, "bad request", err)
+	}
+
+	// approve friend add request
+	util.QQApproveFriendAddRequest(req.Flag)
+	// send hello message
+	util.QQSend(req.UserId, constant.CarrotFriendAddHello)
+	return context.Success(c, nil)
+}
 
 func privateMessageHandler(c echo.Context) error {
 	req := param.RequestPrivateMessage{}
@@ -128,39 +119,30 @@ func groupMessageHandler(c echo.Context) error {
 		return context.Error(c, http.StatusBadRequest, "bad request", err)
 	}
 
-	userId := req.UserId
-	if req.SubType == "anonymous" {
-		userId = req.Anonymous.Id
-	}
-
-	recordGroupMessage(req.GroupId, userId, req.RawMessage) // 记录x
-
-	prefixAt := fmt.Sprintf("[CQ:at,qq=%d]", config.C.QQBot.Bot)
-	if !strings.HasPrefix(req.RawMessage, prefixAt) {
-		return context.Success(c, http.StatusOK)
-	}
-
-	words := util.GetWordsFromString(req.RawMessage)
-	for _, word := range words { // 强功能性关键词
-		switch word.Type {
-		case "n":
-			switch word.Word {
-			case "作业":
-				dealGroupHomeworkMessage(req.GroupId, userId, words)
-				return context.Success(c, nil)
-			case "天气":
-				dealGroupWeatherMessage(req.GroupId, userId, words)
-				return context.Success(c, nil)
-			}
-		case "eng":
-			switch word.Word {
-			case "cf", "codeforces":
-				delGroupCodeforcesMessage(req.GroupId, userId, words)
-				return context.Success(c, nil)
-			}
+	pref := fmt.Sprintf("[CQ:at,qq=%d]", config.C.QQBot.Bot)
+	if strings.HasPrefix(req.RawMessage, pref) {
+		message := req.RawMessage[len(pref):]
+		r := param.GroupMessage{
+			RequestGroupMessage: param.RequestGroupMessage{
+				SubType:    req.SubType,
+				RawMessage: message,
+				UserId:     req.UserId,
+				GroupId:    req.GroupId,
+				Anonymous:  req.Anonymous,
+			},
+			WordsMap: util.GetWordsMapFromMessage(req.RawMessage),
 		}
+		go func(msg param.GroupMessage) {
+			MessagePluginCenter(msg)
+		}(r)
+	} else {
+		r := param.GroupMessage{
+			RequestGroupMessage: req,
+			WordsMap:            util.GetWordsMapFromMessage(req.RawMessage),
+		}
+		go func(msg param.GroupMessage) {
+			ListenPluginCenter(msg)
+		}(r)
 	}
-
-	dealGroupPartyMessage(req.GroupId, userId, words) // 是要和卡洛一起玩吗?
 	return context.Success(c, nil)
 }

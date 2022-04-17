@@ -28,7 +28,7 @@ var messages = []string{
 
 func TestGetWordsFromString(t *testing.T) {
 	for _, message := range messages {
-		words := GetWordsFromString(message)
+		words := GetWordsFromMessage(message)
 		fmt.Println(words)
 	}
 }

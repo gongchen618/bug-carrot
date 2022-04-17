@@ -83,3 +83,5 @@ steps:
         - docker container rm bug-carrot
         - docker run -d --network host --name bug-carrot ${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}:${DRONE_TAG}-${DRONE_COMMIT_SHA:0:8}
 
+#volumes:
+#

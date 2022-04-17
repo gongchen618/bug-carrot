@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// direct contact some API
 func init() {
 
 }

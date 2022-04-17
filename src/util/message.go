@@ -2,6 +2,7 @@ package util
 
 import (
 	"bug-carrot/config"
+	"bug-carrot/controller/param"
 	"bytes"
 	"fmt"
 	"math/rand"
@@ -103,6 +104,14 @@ func QQGroupBan(groupId int64, userId int64, cnt int64) {
 	if _, err = client.Do(req); err != nil {
 		ErrorPrint(err, groupId, "group ban set")
 	}
+}
+
+func GetQQGroupUserId(msg param.GroupMessage) int64 {
+	userId := msg.UserId
+	if msg.SubType == "anonymous" {
+		userId = msg.Anonymous.Id
+	}
+	return userId
 }
 
 func packageMessage(message string) string {
