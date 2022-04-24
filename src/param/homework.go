@@ -1,10 +1,6 @@
 package param
 
-import (
-	"time"
-)
-
-type SubjectType string
+import "time"
 
 type Homework struct {
 	Subject    string    `bson:"subject"`

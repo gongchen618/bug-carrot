@@ -1,7 +1,7 @@
 package util
 
 import (
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"github.com/yanyiwu/gojieba"
 	"strings"
 )
@@ -38,17 +38,4 @@ func GetWordsMapFromMessage(message string) map[param.WordSplit]bool {
 	}
 
 	return wordsMap
-}
-
-func IsWordInMessage(t string, ws []string, msg param.GroupMessage) bool {
-	for _, w := range ws {
-		ans, flag := msg.WordsMap[param.WordSplit{
-			Type: t,
-			Word: w,
-		}]
-		if flag && ans == true {
-			return true
-		}
-	}
-	return false
 }

@@ -16,8 +16,7 @@ type Config struct {
 	App     app     `yaml:"app"`
 	MongoDB mongodb `yaml:"mongodb"`
 	QQBot   qqbot   `yaml:"qqbot"`
-	QQ      qq      `yaml:"qq"`
-	Weather weather `yaml:"weather"`
+	Plugin  plugin  `yaml:"plugin"`
 }
 
 type mongodb struct {
@@ -28,22 +27,28 @@ type mongodb struct {
 }
 
 type app struct {
-	Addr string `yaml:"addr"`
+	Addr   string `yaml:"addr"`
+	Prefix string `yaml:"prefix"`
 }
 
 type qqbot struct {
 	Host string `yaml:"host"`
-	Bot  int64  `yaml:"bot"`
+	QQ   int64  `yaml:"qq"`
 }
 
-type qq struct {
-	Admin int64 `yaml:"admin"`
-	Group int64 `yaml:"group"`
+type plugin struct {
+	Weather  weather  `yaml:"weather"`
+	Homework homework `yaml:"homework"`
 }
 
 type weather struct {
 	Host  string `yaml:"host"`
 	Token string `yaml:"token"`
+}
+
+type homework struct {
+	Admin int64 `yaml:"admin"`
+	Group int64 `yaml:"group"`
 }
 
 func init() {

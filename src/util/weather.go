@@ -3,7 +3,7 @@ package util
 import (
 	"bug-carrot/config"
 	"bug-carrot/constant"
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -15,11 +15,11 @@ import (
 )
 
 func GetWeatherInfoString(location string) string {
-	url := fmt.Sprintf("%s", config.C.Weather.Host)
+	url := config.C.Plugin.Weather.Host
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
 
 	q := req.URL.Query()
-	q.Add("key", config.C.Weather.Token)
+	q.Add("key", config.C.Plugin.Weather.Token)
 	q.Add("location", location)
 	q.Add("language", "zh-Hans")
 	q.Add("unit", "c")

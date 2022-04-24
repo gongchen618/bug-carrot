@@ -8,11 +8,13 @@ mongodb:
   database: "carrot"
 qqbot:
   #hosdt: "http://106.52.43.175:5700"
-  host: "http://127.0.0.1:5700"
-  bot: 927207059
-qq:
-  admin: 2039799616
-  group: 923300200
-weather:
-  host: "https://api.seniverse.com/v3/weather/daily.json"
-  token: "SRw2t5tNFjmvTEkF2"
+  host: "http://127.0.0.1:5701"
+  qq: 927207059
+
+plugin:
+  weather:
+    host: "https://api.seniverse.com/v3/weather/daily.json"
+    token: "SRw2t5tNFjmvTEkF2"
+  homework:
+    admin: 2039799616
+    group: 923300200

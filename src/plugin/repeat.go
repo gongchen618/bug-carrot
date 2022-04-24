@@ -2,33 +2,50 @@ package plugin
 
 import (
 	"bug-carrot/controller"
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"bug-carrot/util"
 )
 
 type repeat struct {
-	PluginName string
-	RepeatStr  string
-	RepeatCnt  int
+	Index     param.PluginIndex
+	RepeatStr string
+	RepeatCnt int
 }
 
 func (p *repeat) GetPluginName() string {
-	return p.PluginName
+	return p.Index.PluginName
+}
+func (p *repeat) CanTime() bool {
+	return p.Index.FlagCanTime
+}
+func (p *repeat) CanMatchedGroup() bool {
+	return p.Index.FlagCanMatchedGroup
+}
+func (p *repeat) CanMatchedPrivate() bool {
+	return p.Index.FlagCanMatchedPrivate
+}
+func (p *repeat) CanListen() bool {
+	return p.Index.FlagCanListen
 }
 
 func (p *repeat) IsTime() bool {
 	return false
 }
-
 func (p *repeat) DoTime() error {
 	return nil
 }
 
-func (p *repeat) IsMatched(msg param.GroupMessage) bool {
+func (p *repeat) IsMatchedGroup(msg param.GroupMessage) bool {
 	return false
 }
+func (p *repeat) DoMatchedGroup(msg param.GroupMessage) error {
+	return nil
+}
 
-func (p *repeat) DoMatched(msg param.GroupMessage) error {
+func (p *repeat) IsMatchedPrivate(msg param.PrivateMessage) bool {
+	return false
+}
+func (p *repeat) DoMatchedPrivate(msg param.PrivateMessage) error {
 	return nil
 }
 
@@ -49,9 +66,15 @@ func (p *repeat) Close() {
 
 func RepeatPluginRegister() {
 	p := &repeat{
-		PluginName: "repeat",
-		RepeatStr:  "",
-		RepeatCnt:  0,
+		Index: param.PluginIndex{
+			PluginName:            "repeat",
+			FlagCanTime:           false,
+			FlagCanMatchedGroup:   false,
+			FlagCanMatchedPrivate: false,
+			FlagCanListen:         true,
+		},
+		RepeatStr: "",
+		RepeatCnt: 0,
 	}
 	controller.PluginRegister(p)
 }

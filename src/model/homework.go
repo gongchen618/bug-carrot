@@ -1,9 +1,8 @@
 package model
 
 import (
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"errors"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,6 +19,7 @@ func (m *model) homeworkCollection() *mongo.Collection {
 type HomeworkInterface interface {
 	AddHomework(homework param.Homework) error
 	DeleteHomework(homework param.Homework) error
+	ClearAllHomework() error
 	GetHomeworkByTimeRange(timeL time.Time, timeR time.Time) ([]param.Homework, error)
 	//GetHomeworkBySubject(context string) ([]param.Homework, error)
 }
@@ -36,7 +36,6 @@ func (m *model) AddHomework(homework param.Homework) error {
 	}
 
 	res, err := m.homeworkCollection().UpdateOne(m.context, filter, update, &opt)
-	fmt.Println(res.UpsertedCount, res.MatchedCount)
 	if err != nil {
 		return err
 	}
@@ -62,6 +61,19 @@ func (m *model) DeleteHomework(homework param.Homework) error {
 	}
 	if res.DeletedCount == 0 {
 		return errors.New("not found")
+	}
+
+	return nil
+}
+
+func (m *model) ClearAllHomework() error {
+	filter := bson.M{}
+	res, err := m.homeworkCollection().DeleteMany(m.context, filter)
+	if err != nil {
+		return err
+	}
+	if res.DeletedCount == 0 {
+		return errors.New("already clear")
 	}
 
 	return nil

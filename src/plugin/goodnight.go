@@ -3,35 +3,45 @@ package plugin
 import (
 	"bug-carrot/constant"
 	"bug-carrot/controller"
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"bug-carrot/util"
 	"time"
 )
 
 type goodNight struct {
-	PluginName  string
+	Index       param.PluginIndex
 	PassHour    map[int]bool
 	UserDay     map[int64]int
 	LastUserDay int
 }
 
 func (p *goodNight) GetPluginName() string {
-	return p.PluginName
+	return p.Index.PluginName
+}
+func (p *goodNight) CanTime() bool {
+	return p.Index.FlagCanTime
+}
+func (p *goodNight) CanMatchedGroup() bool {
+	return p.Index.FlagCanMatchedGroup
+}
+func (p *goodNight) CanMatchedPrivate() bool {
+	return p.Index.FlagCanMatchedPrivate
+}
+func (p *goodNight) CanListen() bool {
+	return p.Index.FlagCanListen
 }
 
 func (p *goodNight) IsTime() bool {
 	return false
 }
-
 func (p *goodNight) DoTime() error {
 	return nil
 }
 
-func (p *goodNight) IsMatched(msg param.GroupMessage) bool {
-	return util.IsWordInMessage("n", []string{"晚安"}, msg)
+func (p *goodNight) IsMatchedGroup(msg param.GroupMessage) bool {
+	return msg.WordsMap.ExistWord("n", []string{"晚安"})
 }
-
-func (p *goodNight) DoMatched(msg param.GroupMessage) error {
+func (p *goodNight) DoMatchedGroup(msg param.GroupMessage) error {
 	hour, day := time.Now().Hour(), time.Now().Day()
 	ok, exist := p.PassHour[hour]
 	id := util.GetQQGroupUserId(msg)
@@ -60,6 +70,13 @@ func (p *goodNight) DoMatched(msg param.GroupMessage) error {
 	return nil
 }
 
+func (p *goodNight) IsMatchedPrivate(msg param.PrivateMessage) bool {
+	return false
+}
+func (p *goodNight) DoMatchedPrivate(msg param.PrivateMessage) error {
+	return nil
+}
+
 func (p *goodNight) Listen(msg param.GroupMessage) {
 
 }
@@ -74,7 +91,13 @@ func GoodNightPluginRegister() {
 		passHour[h] = true
 	}
 	p := &goodNight{
-		PluginName:  "goodnight",
+		Index: param.PluginIndex{
+			PluginName:            "goodnight",
+			FlagCanTime:           false,
+			FlagCanMatchedGroup:   true,
+			FlagCanMatchedPrivate: false,
+			FlagCanListen:         false,
+		},
 		PassHour:    passHour,
 		UserDay:     make(map[int64]int),
 		LastUserDay: time.Now().Day() - 1,

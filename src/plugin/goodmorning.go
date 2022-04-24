@@ -3,49 +3,59 @@ package plugin
 import (
 	"bug-carrot/constant"
 	"bug-carrot/controller"
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"bug-carrot/util"
 	"time"
 )
 
 type goodMorning struct {
-	PluginName  string
+	Index       param.PluginIndex
 	PassHour    map[int]bool
 	UserDay     map[int64]int
 	LastUserDay int
 }
 
 func (p *goodMorning) GetPluginName() string {
-	return p.PluginName
+	return p.Index.PluginName
+}
+func (p *goodMorning) CanTime() bool {
+	return p.Index.FlagCanTime
+}
+func (p *goodMorning) CanMatchedGroup() bool {
+	return p.Index.FlagCanMatchedGroup
+}
+func (p *goodMorning) CanMatchedPrivate() bool {
+	return p.Index.FlagCanMatchedPrivate
+}
+func (p *goodMorning) CanListen() bool {
+	return p.Index.FlagCanListen
 }
 
 func (p *goodMorning) IsTime() bool {
 	return false
 }
-
 func (p *goodMorning) DoTime() error {
 	return nil
 }
 
-func (p *goodMorning) IsMatched(req param.GroupMessage) bool {
-	return util.IsWordInMessage("n", []string{"早安"}, req)
+func (p *goodMorning) IsMatchedGroup(msg param.GroupMessage) bool {
+	return msg.WordsMap.ExistWord("n", []string{"早安"})
 }
-
-func (p *goodMorning) DoMatched(req param.GroupMessage) error {
+func (p *goodMorning) DoMatchedGroup(msg param.GroupMessage) error {
 	hour, day := time.Now().Hour(), time.Now().Day()
 	ok, exist := p.PassHour[hour]
-	id := util.GetQQGroupUserId(req)
+	id := util.GetQQGroupUserId(msg)
 
 	// not night
 	if !exist || !ok {
-		util.QQGroupSendAtSomeone(req.GroupId, id, constant.CarrotGroupGoodMorningCheat)
+		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodMorningCheat)
 		return nil
 	}
 
 	// already greeting
-	userDay, exist := p.UserDay[util.GetQQGroupUserId(req)]
+	userDay, exist := p.UserDay[util.GetQQGroupUserId(msg)]
 	if exist && userDay == day {
-		util.QQGroupSendAtSomeone(req.GroupId, id, constant.CarrotGroupGoodMorningRepeat)
+		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodMorningRepeat)
 		return nil
 	}
 
@@ -53,10 +63,17 @@ func (p *goodMorning) DoMatched(req param.GroupMessage) error {
 	p.UserDay[id] = day
 	if p.LastUserDay != day {
 		p.LastUserDay = day
-		util.QQGroupSendAtSomeone(req.GroupId, id, constant.CarrotGroupGoodMorningFirst)
+		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodMorningFirst)
 	} else {
-		util.QQGroupSendAtSomeone(req.GroupId, id, constant.CarrotGroupGoodMorning)
+		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodMorning)
 	}
+	return nil
+}
+
+func (p *goodMorning) IsMatchedPrivate(msg param.PrivateMessage) bool {
+	return false
+}
+func (p *goodMorning) DoMatchedPrivate(msg param.PrivateMessage) error {
 	return nil
 }
 
@@ -73,7 +90,13 @@ func GoodMorningPluginRegister() {
 		passHour[h] = true
 	}
 	p := &goodMorning{
-		PluginName:  "goodMorning",
+		Index: param.PluginIndex{
+			PluginName:            "goodMorning",
+			FlagCanTime:           false,
+			FlagCanMatchedGroup:   true,
+			FlagCanMatchedPrivate: false,
+			FlagCanListen:         false,
+		},
 		PassHour:    passHour,
 		UserDay:     make(map[int64]int),
 		LastUserDay: time.Now().Day() - 1,

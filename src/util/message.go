@@ -2,7 +2,7 @@ package util
 
 import (
 	"bug-carrot/config"
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"bytes"
 	"fmt"
 	"math/rand"

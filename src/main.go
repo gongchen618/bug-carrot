@@ -15,10 +15,10 @@ import (
 
 func main() {
 	e := echo.New()
-	router.InitRouter(e.Group(config.C.App.Addr))
+	router.InitRouter(e.Group(config.C.App.Prefix))
 
 	pluginRegister()
-	go controller.TimePluginCenter()
+	go controller.WorkTimePlugins()
 
 	go signalWaiter()
 	log.Fatal(e.Start(config.C.App.Addr))
@@ -29,6 +29,7 @@ func pluginRegister() { // 总注册函数，注意顺序
 	plugin.WeatherPluginRegister()
 	plugin.GoodMorningPluginRegister()
 	plugin.GoodNightPluginRegister()
+	plugin.RepeatPluginRegister()
 	plugin.DefaultPluginRegister() // 默认回复
 }
 
@@ -39,6 +40,6 @@ func signalWaiter() { // 接收 SIGINT 和 SIGTERM 信号
 	<-sigs
 
 	fmt.Println("exiting") //
-	controller.PluginClose()
+	controller.ClosePlugins()
 	os.Exit(0)
 }

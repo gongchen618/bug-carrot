@@ -1,23 +1,39 @@
 package controller
 
 import (
-	"bug-carrot/controller/param"
+	"bug-carrot/param"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
 var (
-	Plugin []param.PluginInterface
+	PluginTime    []param.PluginInterface
+	PluginGroup   []param.PluginInterface
+	PluginPrivate []param.PluginInterface
+	PluginListen  []param.PluginInterface
+	Plugin        []param.PluginInterface
 )
 
 func PluginRegister(p param.PluginInterface) {
+	if p.CanTime() {
+		PluginTime = append(PluginTime, p)
+	}
+	if p.CanMatchedGroup() {
+		PluginGroup = append(PluginGroup, p)
+	}
+	if p.CanMatchedPrivate() {
+		PluginPrivate = append(PluginPrivate, p)
+	}
+	if p.CanListen() {
+		PluginListen = append(PluginListen, p)
+	}
 	Plugin = append(Plugin, p)
 }
 
-func MessagePluginCenter(msg param.GroupMessage) {
-	for _, p := range Plugin {
-		if p.IsMatched(msg) {
-			if err := p.DoMatched(msg); err != nil {
+func WorkGroupMessagePlugins(msg param.GroupMessage) {
+	for _, p := range PluginGroup {
+		if p.IsMatchedGroup(msg) {
+			if err := p.DoMatchedGroup(msg); err != nil {
 				logrus.WithFields(logrus.Fields{"err": err, "plugin": p.GetPluginName(), "type": "message"}).Warn("plugin error")
 			}
 			return
@@ -25,9 +41,20 @@ func MessagePluginCenter(msg param.GroupMessage) {
 	}
 }
 
-func TimePluginCenter() {
+func WorkPrivateMessagePlugins(msg param.PrivateMessage) {
+	for _, p := range PluginPrivate {
+		if p.IsMatchedPrivate(msg) {
+			if err := p.DoMatchedPrivate(msg); err != nil {
+				logrus.WithFields(logrus.Fields{"err": err, "plugin": p.GetPluginName(), "type": "message"}).Warn("plugin error")
+			}
+			return
+		}
+	}
+}
+
+func WorkTimePlugins() { // 10s 一次轮询
 	for {
-		for _, p := range Plugin {
+		for _, p := range PluginTime {
 			if p.IsTime() {
 				if err := p.DoTime(); err != nil {
 					logrus.WithFields(logrus.Fields{"err": err, "plugin": p.GetPluginName(), "type": "time"}).Warn("plugin error")
@@ -38,13 +65,13 @@ func TimePluginCenter() {
 	}
 }
 
-func ListenPluginCenter(msg param.GroupMessage) {
-	for _, p := range Plugin {
+func WorkListenPlugins(msg param.GroupMessage) {
+	for _, p := range PluginListen {
 		p.Listen(msg)
 	}
 }
 
-func PluginClose() {
+func ClosePlugins() {
 	for _, p := range Plugin {
 		p.Close()
 	}
