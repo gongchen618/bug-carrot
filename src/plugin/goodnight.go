@@ -5,14 +5,17 @@ import (
 	"bug-carrot/controller"
 	"bug-carrot/param"
 	"bug-carrot/util"
+	"fmt"
 	"time"
 )
 
 type goodNight struct {
-	Index       param.PluginIndex
-	PassHour    map[int]bool
-	UserDay     map[int64]int
-	LastUserDay int
+	Index                param.PluginIndex
+	PassHour             map[int]bool
+	UserLastGoodNightDay map[int64]int
+	UserMessageCount     map[int64]int
+	LastGoodNightDay     int
+	TimeDividingLine     int
 }
 
 func (p *goodNight) GetPluginName() string {
@@ -46,6 +49,12 @@ func (p *goodNight) DoMatchedGroup(msg param.GroupMessage) error {
 	ok, exist := p.PassHour[hour]
 	id := util.GetQQGroupUserId(msg)
 
+	// 处理 12 点之后是昨天
+	if hour <= p.TimeDividingLine {
+		d, _ := time.ParseDuration("-24h")
+		day = time.Now().Add(d).Day()
+	}
+
 	// not night
 	if !exist || !ok {
 		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodNightCheat)
@@ -53,16 +62,15 @@ func (p *goodNight) DoMatchedGroup(msg param.GroupMessage) error {
 	}
 
 	// already greeting
-	userDay, exist := p.UserDay[util.GetQQGroupUserId(msg)]
+	userDay, exist := p.UserLastGoodNightDay[util.GetQQGroupUserId(msg)]
 	if exist && userDay == day {
 		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodNightRepeat)
 		return nil
 	}
 
-	//
-	p.UserDay[id] = day
-	if p.LastUserDay != day {
-		p.LastUserDay = day
+	p.UserLastGoodNightDay[id] = day
+	if p.LastGoodNightDay != day {
+		p.LastGoodNightDay = day
 		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodNightFirst)
 	} else {
 		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodNight)
@@ -78,7 +86,39 @@ func (p *goodNight) DoMatchedPrivate(msg param.PrivateMessage) error {
 }
 
 func (p *goodNight) Listen(msg param.GroupMessage) {
+	hour, day := time.Now().Hour(), time.Now().Day()
+	ok, exist := p.PassHour[hour]
+	id := util.GetQQGroupUserId(msg)
 
+	// 处理 12 点之后是昨天
+	if hour <= p.TimeDividingLine {
+		d, _ := time.ParseDuration("-24h")
+		day = time.Now().Add(d).Day()
+	}
+
+	// not night
+	if !exist || !ok {
+		return
+	}
+
+	// already greeting but chat
+	userDay, exist := p.UserLastGoodNightDay[util.GetQQGroupUserId(msg)]
+	if exist && userDay == day {
+		cnt, flag := p.UserMessageCount[id]
+		if flag {
+			p.UserMessageCount[id] = cnt + 1
+		} else {
+			p.UserMessageCount[id] = 1
+		}
+
+		if p.UserMessageCount[id]%5 == 0 {
+			util.QQGroupBan(msg.GroupId, id, int64(60*(p.UserMessageCount[id]/5)))
+			util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodNightButChat)
+		} else if p.UserMessageCount[id]%4 == 0 {
+			util.QQGroupSend(msg.GroupId, fmt.Sprintf("[CQ:poke,qq=%d]", id))
+		}
+		return
+	}
 }
 
 func (p *goodNight) Close() {
@@ -96,11 +136,13 @@ func GoodNightPluginRegister() {
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   true,
 			FlagCanMatchedPrivate: false,
-			FlagCanListen:         false,
+			FlagCanListen:         true,
 		},
-		PassHour:    passHour,
-		UserDay:     make(map[int64]int),
-		LastUserDay: time.Now().Day() - 1,
+		PassHour:             passHour,
+		UserLastGoodNightDay: make(map[int64]int),
+		UserMessageCount:     make(map[int64]int),
+		LastGoodNightDay:     time.Now().Day() - 1,
+		TimeDividingLine:     6,
 	}
 	controller.PluginRegister(p)
 }

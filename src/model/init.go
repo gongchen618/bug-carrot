@@ -9,6 +9,7 @@ import (
 type Model interface {
 	Close()
 	HomeworkInterface
+	FoodInterface
 }
 
 type model struct {

@@ -1,11 +1,11 @@
 package constant
 
-var (
+var ( // friend add
 	CarrotFriendAddHello = "ฅ•̀∀•́ฅ"
 	CarrotFriendNotAdmin = "妈妈说不可以跟陌生人说话!"
 )
 
-var ( //index
+var ( // index
 	CarrotGroupPuzzled = "你好谢谢小笼包再见！"
 )
 
@@ -39,4 +39,36 @@ var ( // good night
 var ( // weather
 	CarrotWeatherFailed = "咦...卡洛的天气预言术好像失效了...是说了什么不该说的话吗"
 	CarrotWeatherStart  = "当当~天气预言术是卡洛最喜欢的魔法啦!"
+)
+
+var ( // dice
+	CarrotDiceStrangeInput = "卡洛是不能占卜奇怪东西的哦"
+	CarrotDiceEmptyTopic   = "不存在之物的占卜，答案只在你的心里呢"
+	//CarrotDiceSuccessFullPoint = "！！100% 概率事件！！你就是命运之神本神！！卡洛要好好记录下来..."
+	//CarrotDiceSuccessGold      = "占卜的结果是绝无可能失手！信心满满的往前走吧！"
+	//CarrotDiceSuccessSilver    = "是很难避免的事情哦~愿命运之神与你同在"
+	//CarrotDiceSuccessBronze    = "卡洛认为基本可以放轻松啦"
+	//CarrotDiceFailedGold       = "卡洛只能看见命运的天平在不停的摇摆摇摆摇摆~"
+	//CarrotDiceFailedSilver     = "水晶球里徘徊着一大团迷雾...情况看起来不太对劲，卡洛奉劝你最好小心"
+	//CarrotDiceFailedZeroPoint  = "哼哼，卡洛的占卜术显示这是不可能发生的事哦！"
+	CarrotDiceSuccessFullPoint = "千真万确"
+	CarrotDiceSuccessGold      = "不可逃避的命运"
+	CarrotDiceSuccessSilver    = "可以确信会发生的事"
+	CarrotDiceSuccessBronze    = "大概率事件"
+	CarrotDiceFailedGold       = "不必抱有过多期待"
+	CarrotDiceFailedSilver     = "做好无法实现的准备吧"
+	CarrotDiceFailedZeroPoint  = "绝无可能"
+)
+
+var ( // food
+	CarrotFoodStrangeInput = "卡洛有点不太明白你的意思...可以换个方式再说一遍吗"
+
+	CarrotFoodAddFailed    = "卡洛拒绝了你的安利！"
+	CarrotFoodDeleteFailed = "卡洛拒绝了你的拔草！"
+
+	CarrotFoodRandFailed = "奇怪...怎么突然好晕...卡洛需要睡一觉..."
+	CarrotFoodRandEmpty  = "诶嘿，卡洛好像没想到合适的推荐呢~"
+
+	CarrotFoodInfoGetFailed = "有人又写出 bug 啦！"
+	CarrotFoodInfoGetEmpty  = "好像没有这个安利？"
 )

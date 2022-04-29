@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func QQReverseHTTPMiddleHandler(c echo.Context) error {
@@ -54,8 +55,8 @@ func QQReverseHTTPMiddleHandler(c echo.Context) error {
 			return context.Error(c, http.StatusBadRequest, "bad request", err)
 		}
 		switch p2.RequestType {
-		//case "friend":
-		//return friendAddRequestHandler(c)
+		case "friend":
+			return friendAddRequestHandler(c)
 		}
 	}
 
@@ -72,6 +73,7 @@ func friendAddRequestHandler(c echo.Context) error {
 	// approve friend add request
 	util.QQApproveFriendAddRequest(req.Flag)
 	// send hello message
+	time.Sleep(2 * time.Second)
 	util.QQSend(req.UserId, constant.CarrotFriendAddHello)
 	return context.Success(c, nil)
 }
@@ -113,6 +115,7 @@ func groupMessageHandler(c echo.Context) error {
 				UserId:     req.UserId,
 				GroupId:    req.GroupId,
 				Anonymous:  req.Anonymous,
+				Sender:     req.Sender,
 			},
 			WordsMap: param.WordsMap{
 				Map: util.GetWordsMapFromMessage(req.RawMessage),

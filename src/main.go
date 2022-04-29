@@ -25,11 +25,15 @@ func main() {
 }
 
 func pluginRegister() { // 总注册函数，注意顺序
-	plugin.HomeworkPluginRegister()
-	plugin.WeatherPluginRegister()
-	plugin.GoodMorningPluginRegister()
-	plugin.GoodNightPluginRegister()
-	plugin.RepeatPluginRegister()
+	plugin.HomeworkPluginRegister() // 作业
+	plugin.FoodPluginRegister()     // 吃什么
+	plugin.WeatherPluginRegister()  // 天气
+	plugin.DicePluginRegister()     // 骰子
+
+	plugin.GoodMorningPluginRegister() // 早安
+	plugin.GoodNightPluginRegister()   // 晚安
+	plugin.RepeatPluginRegister()      // 重复
+
 	plugin.DefaultPluginRegister() // 默认回复
 }
 

@@ -4,9 +4,13 @@ import (
 	"bug-carrot/param"
 	"github.com/yanyiwu/gojieba"
 	"strings"
+	"sync"
 )
 
+var jiebaMutex sync.Mutex
+
 func GetWordsFromMessage(message string) []param.WordSplit {
+	jiebaMutex.Lock()
 	x := gojieba.NewJieba()
 	defer x.Free()
 
@@ -20,10 +24,12 @@ func GetWordsFromMessage(message string) []param.WordSplit {
 		})
 	}
 
+	jiebaMutex.Unlock()
 	return wordsResponse
 }
 
 func GetWordsMapFromMessage(message string) map[param.WordSplit]bool {
+	jiebaMutex.Lock()
 	x := gojieba.NewJieba()
 	defer x.Free()
 
@@ -37,5 +43,6 @@ func GetWordsMapFromMessage(message string) map[param.WordSplit]bool {
 		}] = true
 	}
 
+	jiebaMutex.Unlock()
 	return wordsMap
 }

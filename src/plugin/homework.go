@@ -9,6 +9,7 @@ import (
 	"bug-carrot/util"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type homework struct {
@@ -41,32 +42,29 @@ func (p *homework) DoTime() error {
 func (p *homework) IsMatchedGroup(msg param2.GroupMessage) bool {
 	return msg.WordsMap.ExistWord("n", []string{"作业"})
 }
-func (p *homework) DoMatchedGroup(msg param2.GroupMessage) error {
+func (p *homework) DoMatchedGroup(msg param2.GroupMessage) error { // 还没写具体科目查询(心虚)
 	if msg.WordsMap.ExistWord("n", []string{"微积分"}) {
-		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), util.GetHomeworkStringSubject("微积分"))
+		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getHomeworkSubjectString("微积分"))
 		return nil
 	}
 	if msg.WordsMap.ExistWord("n", []string{"大物", "大雾", "大学物理"}) {
-		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), util.GetHomeworkStringSubject("大物"))
+		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getHomeworkSubjectString("大物"))
 		return nil
 	}
 	if msg.WordsMap.ExistWord("n", []string{"离散", "离散数学"}) {
-		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), util.GetHomeworkStringSubject("离散"))
+		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getHomeworkSubjectString("离散"))
 		return nil
 	}
-	util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), util.GetHomeworkStringSubject(""))
+	util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getHomeworkString())
 	return nil
 }
 
 func (p *homework) IsMatchedPrivate(msg param2.PrivateMessage) bool {
-	return msg.UserId == config.C.Plugin.Homework.Admin && msg.WordsMap.ExistWord("n", []string{"作业"})
+	return msg.UserId == config.C.Plugin.Homework.Admin && strings.HasPrefix(msg.RawMessage, "作业")
 }
-func (p *homework) DoMatchedPrivate(msg param2.PrivateMessage) error {
-	m := model.GetModel()
-	defer m.Close()
-
-	str := strings.Split(msg.RawMessage, " ")
-	if len(str) >= 2 { // 格式应该是 作业 xx xx xx
+func (p *homework) DoMatchedPrivate(msg param2.PrivateMessage) error { // 格式：作业 xx xx xx
+	str := strings.Split(msg.RawMessage, " ") // 没有考虑错误情况 因为是 admin private message
+	if len(str) >= 2 {
 		switch str[1] {
 		case "delete":
 			if len(str) >= 4 {
@@ -115,12 +113,12 @@ func homeworkDelete(id int64, subject string, context string) {
 	m := model.GetModel()
 	defer m.Close()
 
-	homework := param2.Homework{
+	hw := param2.Homework{
 		Subject: subject,
 		Context: context,
 	}
 
-	if err := m.DeleteHomework(homework); err != nil {
+	if err := m.DeleteHomework(hw); err != nil {
 		util.QQSend(id, constant.CarrotHomeworkDeleteFailed)
 		util.ErrorPrint(err, nil, "mongo")
 		return
@@ -131,19 +129,19 @@ func homeworkDelete(id int64, subject string, context string) {
 }
 
 func homeworkShow(id int64) {
-	util.QQSend(id, util.GetHomeworkString())
+	util.QQSend(id, getHomeworkString())
 }
 
 func homeworkAdd(id int64, subject string, context string) {
 	m := model.GetModel()
 	defer m.Close()
 
-	homework := param2.Homework{
+	hw := param2.Homework{
 		Subject: subject,
 		Context: context,
 	}
 
-	if err := m.AddHomework(homework); err != nil {
+	if err := m.AddHomework(hw); err != nil {
 		util.QQSend(id, constant.CarrotHomeworkAddFailed)
 		util.ErrorPrint(err, nil, "mongo")
 		return
@@ -165,4 +163,50 @@ func homeworkClear(id int64) {
 
 	util.QQSend(id, constant.CarrotHomeworkDeleteSuccess)
 	util.QQGroupSend(config.C.Plugin.Homework.Group, "新的作业正在初始化...")
+}
+
+func getHomeworkString() string { // 暂时也还没有处理时间
+	m := model.GetModel()
+	defer m.Close()
+
+	timeR := time.Now()
+	d, err := time.ParseDuration("-300h")
+	if err != nil {
+		util.ErrorPrint(err, timeR, "time init")
+		return constant.CarrotHomeworkShowFailed
+	}
+	timeL := timeR.Add(d)
+	homeworks, err := m.GetHomeworkByTimeRange(timeL, timeR)
+	if err != nil {
+		util.ErrorPrint(err, timeR, "mongo")
+		return constant.CarrotHomeworkShowFailed
+	}
+
+	if len(homeworks) == 0 {
+		return constant.CarrotHomeworkShowEmpty
+	}
+
+	message := constant.CarrotHomeworkShowStart
+	subjectMap := make(map[string]int)
+	subjectInfoMap := make(map[string]string)
+	for _, hw := range homeworks {
+		cnt, exist := subjectMap[hw.Subject]
+		info, exist := subjectInfoMap[hw.Subject]
+		if exist == false {
+			subjectMap[hw.Subject] = 1
+			subjectInfoMap[hw.Subject] = fmt.Sprintf("(%d)%s", cnt+1, hw.Context)
+		} else {
+			subjectMap[hw.Subject] = cnt + 1
+			subjectInfoMap[hw.Subject] = fmt.Sprintf("%s (%d)%s", info, cnt+1, hw.Context)
+		}
+	}
+	for subject, info := range subjectInfoMap {
+		message = fmt.Sprintf("%s\n【%s】%s", message, subject, info)
+	}
+
+	return message
+}
+
+func getHomeworkSubjectString(subject string) string {
+	return getHomeworkString()
 }

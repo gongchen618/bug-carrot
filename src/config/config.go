@@ -39,6 +39,7 @@ type qqbot struct {
 type plugin struct {
 	Weather  weather  `yaml:"weather"`
 	Homework homework `yaml:"homework"`
+	Food     food     `yaml:"food"`
 }
 
 type weather struct {
@@ -49,6 +50,10 @@ type weather struct {
 type homework struct {
 	Admin int64 `yaml:"admin"`
 	Group int64 `yaml:"group"`
+}
+
+type food struct {
+	Admin int64 `yaml:"admin"`
 }
 
 func init() {

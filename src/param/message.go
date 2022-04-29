@@ -22,6 +22,12 @@ type RequestGroupMessage struct {
 	UserId     int64     `json:"user_id"`
 	GroupId    int64     `json:"group_id"`
 	Anonymous  anonymous `json:"anonymous"`
+	Sender     object    `json:"object"`
+}
+
+type object struct {
+	Nickname string `json:"nickname"`
+	CardName string `json:"card"`
 }
 
 type anonymous struct {

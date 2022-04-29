@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bug-carrot/param"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -28,6 +29,7 @@ func PluginRegister(p param.PluginInterface) {
 		PluginListen = append(PluginListen, p)
 	}
 	Plugin = append(Plugin, p)
+	fmt.Println(fmt.Sprintf("插件 %s 已装载", p.GetPluginName()))
 }
 
 func WorkGroupMessagePlugins(msg param.GroupMessage) {
