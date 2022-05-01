@@ -14,11 +14,12 @@ import (
 )
 
 type food struct {
-	Index            param.PluginIndex
-	FoodAddPrefix    string
-	FoodDeletePrefix string
-	FoodQueryPrefix  string
-	DividingString   string
+	Index                param.PluginIndex
+	FoodAddPrefix        string
+	FoodDeletePrefix     string
+	FoodQueryPrefix      string
+	DividingString       string
+	FoodAddPrefixPrivate string
 }
 
 func (p *food) GetPluginName() string {
@@ -83,16 +84,28 @@ func (p *food) DoMatchedGroup(msg param.GroupMessage) error {
 }
 
 func (p *food) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	return msg.UserId == config.C.Plugin.Food.Admin && strings.HasPrefix(msg.RawMessage, "查杀")
+	if (msg.UserId == config.C.Plugin.Food.Admin && strings.HasPrefix(msg.RawMessage, "查杀")) || strings.HasPrefix(msg.RawMessage, p.FoodAddPrefixPrivate) {
+		return true
+	}
+	return false
 }
 func (p *food) DoMatchedPrivate(msg param.PrivateMessage) error { // 格式：查杀 xx
-	str := strings.Split(msg.RawMessage, " ") // 没有考虑错误情况 因为是 admin private message
-	if len(str) >= 2 {
-		foodCheck(msg.UserId, str[1])
-		return nil
+	if msg.UserId == config.C.Plugin.Food.Admin && strings.HasPrefix(msg.RawMessage, "查杀") {
+		str := strings.Split(msg.RawMessage, " ") // 没有考虑错误情况 因为是 admin private message
+		if len(str) >= 2 {
+			foodCheck(msg.UserId, str[1])
+			return nil
+		}
+		util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
+	} else {
+		info := msg.RawMessage[len(p.FoodAddPrefix):]
+		if strings.Count(info, p.DividingString) != 2 {
+			util.QQSend(msg.UserId, constant.CarrotFoodStrangeInput)
+			return nil
+		}
+		str := strings.Split(info, p.DividingString)
+		foodAdd(msg.UserId, config.C.Plugin.Food.Group, str[0], str[1], str[2])
 	}
-
-	util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
 	return nil
 }
 
@@ -112,10 +125,11 @@ func FoodPluginRegister() {
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
 		},
-		FoodAddPrefix:    " 安利",
-		FoodDeletePrefix: " 拔草",
-		FoodQueryPrefix:  " 吃什么",
-		DividingString:   "#",
+		FoodAddPrefix:        " 安利",
+		FoodDeletePrefix:     " 拔草",
+		FoodQueryPrefix:      " 吃什么",
+		FoodAddPrefixPrivate: "安利",
+		DividingString:       "#",
 	}
 	controller.PluginRegister(p)
 }

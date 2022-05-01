@@ -54,6 +54,7 @@ type homework struct {
 
 type food struct {
 	Admin int64 `yaml:"admin"`
+	Group int64 `yaml:"group"`
 }
 
 func init() {
