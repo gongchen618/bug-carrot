@@ -98,7 +98,7 @@ func (p *food) DoMatchedPrivate(msg param.PrivateMessage) error { // 格式：�
 		}
 		util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
 	} else {
-		info := msg.RawMessage[len(p.FoodAddPrefix):]
+		info := msg.RawMessage[len(p.FoodAddPrefixPrivate):]
 		if strings.Count(info, p.DividingString) != 2 {
 			util.QQSend(msg.UserId, constant.CarrotFoodStrangeInput)
 			return nil
