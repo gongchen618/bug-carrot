@@ -19,6 +19,7 @@ import (
 	"time"
 )
 
+// QQReverseHTTPMiddleHandler 接受 cqhttp 的消息
 func QQReverseHTTPMiddleHandler(c echo.Context) error {
 	var bodyBytes []byte
 	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)

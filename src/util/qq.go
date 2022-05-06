@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// QQApproveFriendAddRequest 通过好友申请
 func QQApproveFriendAddRequest(flag string) {
 	url := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/set_friend_add_request")
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(nil))
@@ -29,6 +30,8 @@ func QQApproveFriendAddRequest(flag string) {
 	}
 }
 
+// QQSend 接受 userId 和 message，并私聊发送
+// 如果不是好友，会发送失败
 func QQSend(userId int64, message string) {
 	sendMsgUrl := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/send_private_msg")
 	req, err := http.NewRequest("POST", sendMsgUrl, bytes.NewBuffer(nil))
@@ -48,6 +51,8 @@ func QQSend(userId int64, message string) {
 	}
 }
 
+// QQGroupSend 接受 groupId 和 message，并在对应群聊中发送
+// 如果不在群聊中，会发送失败
 func QQGroupSend(groupId int64, message string) {
 	sendMsgUrl := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/send_group_msg")
 	req, err := http.NewRequest("POST", sendMsgUrl, bytes.NewBuffer(nil))
@@ -67,6 +72,8 @@ func QQGroupSend(groupId int64, message string) {
 	}
 }
 
+// QQGroupSendAtSomeone 接受 groupId 和 userId 和 message，并在对应群聊中 @ 对应成员并发送
+// 如果不在群聊中，会发送失败
 func QQGroupSendAtSomeone(groupId int64, userId int64, message string) {
 	sendMsgUrl := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/send_group_msg")
 	req, err := http.NewRequest("POST", sendMsgUrl, bytes.NewBuffer(nil))
@@ -86,6 +93,8 @@ func QQGroupSendAtSomeone(groupId int64, userId int64, message string) {
 	}
 }
 
+// QQGroupBan 接受 groupId 和 userId，并在对应群聊中禁言用户，时长 cnt (单位分钟）
+// 如果不是管理员，会禁言失败
 func QQGroupBan(groupId int64, userId int64, cnt int64) {
 	sendMsgUrl := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/set_group_ban")
 	req, err := http.NewRequest("POST", sendMsgUrl, bytes.NewBuffer(nil))
@@ -106,6 +115,7 @@ func QQGroupBan(groupId int64, userId int64, cnt int64) {
 	}
 }
 
+// GetQQGroupUserId 获取 msg 中的 userId (处理匿名用户的问题）
 func GetQQGroupUserId(msg param.GroupMessage) int64 {
 	userId := msg.UserId
 	if msg.SubType == "anonymous" {
@@ -114,6 +124,7 @@ func GetQQGroupUserId(msg param.GroupMessage) int64 {
 	return userId
 }
 
+// packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
 	data := rand.Int63n(222)
 	return fmt.Sprintf("%s[CQ:face,id=%d]", message, data)
