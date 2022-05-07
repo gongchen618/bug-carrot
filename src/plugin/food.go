@@ -46,6 +46,9 @@ func (p *food) DoTime() error {
 }
 
 func (p *food) IsMatchedGroup(msg param.GroupMessage) bool {
+	if config.C.RiskControl {
+		return false
+	}
 	if msg.Anonymous.Id != 0 { // 禁止匿名
 		return false
 	}
@@ -65,7 +68,7 @@ func (p *food) DoMatchedGroup(msg param.GroupMessage) error {
 			return nil
 		}
 		str := strings.Split(info, p.DividingString)
-		foodAdd(msg.UserId, msg.GroupId, str[0], str[1], str[2])
+		foodAddGroup(msg.UserId, msg.GroupId, str[0], str[1], str[2])
 
 	case strings.HasPrefix(msg.RawMessage, p.FoodDeletePrefix): // 格式：拔草name
 		name := msg.RawMessage[len(p.FoodDeletePrefix):]
@@ -75,16 +78,22 @@ func (p *food) DoMatchedGroup(msg param.GroupMessage) error {
 		info := msg.RawMessage[len(p.FoodQueryPrefix):]
 		if strings.Count(info, p.DividingString) == 1 {
 			str := strings.Split(msg.RawMessage, p.DividingString)
-			foodRandByPlace(msg.UserId, msg.GroupId, str[1])
+			foodRandByPlaceGroup(msg.UserId, msg.GroupId, str[1])
 			return nil
 		}
-		foodRandAll(msg.UserId, msg.GroupId)
+		foodRandAllGroup(msg.UserId, msg.GroupId)
 	}
 	return nil
 }
 
 func (p *food) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	if (msg.UserId == config.C.Plugin.Food.Admin && strings.HasPrefix(msg.RawMessage, "查杀")) || strings.HasPrefix(msg.RawMessage, p.FoodAddPrefixPrivate) {
+	if msg.UserId == config.C.Plugin.Food.Admin && strings.HasPrefix(msg.RawMessage, "查杀") {
+		return true
+	}
+	if strings.HasPrefix(msg.RawMessage, p.FoodAddPrefixPrivate) {
+		return true
+	}
+	if config.C.RiskControl && strings.HasPrefix(msg.RawMessage, p.FoodQueryPrefix[1:]) {
 		return true
 	}
 	return false
@@ -97,14 +106,22 @@ func (p *food) DoMatchedPrivate(msg param.PrivateMessage) error { // 格式：�
 			return nil
 		}
 		util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
-	} else {
+	} else if strings.HasPrefix(msg.RawMessage, p.FoodAddPrefixPrivate) {
 		info := msg.RawMessage[len(p.FoodAddPrefixPrivate):]
 		if strings.Count(info, p.DividingString) != 2 {
 			util.QQSend(msg.UserId, constant.CarrotFoodStrangeInput)
 			return nil
 		}
 		str := strings.Split(info, p.DividingString)
-		foodAdd(msg.UserId, config.C.Plugin.Food.Group, str[0], str[1], str[2])
+		foodAddPrivate(msg.UserId, str[0], str[1], str[2])
+	} else {
+		info := msg.RawMessage[len(p.FoodQueryPrefix[1:]):]
+		if strings.Count(info, p.DividingString) == 1 {
+			str := strings.Split(msg.RawMessage, p.DividingString)
+			foodRandByPlacePrivate(msg.UserId, str[1])
+			return nil
+		}
+		foodRandAllGroupPrivate(msg.UserId)
 	}
 	return nil
 }
@@ -121,7 +138,7 @@ func FoodPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "food",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   true,
+			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
 		},
@@ -134,7 +151,7 @@ func FoodPluginRegister() {
 	controller.PluginRegister(p)
 }
 
-func foodAdd(id int64, group int64, name string, address string, description string) {
+func foodAddGroup(id int64, group int64, name string, address string, description string) {
 	m := model.GetModel()
 	defer m.Close()
 
@@ -154,6 +171,26 @@ func foodAdd(id int64, group int64, name string, address string, description str
 	util.QQGroupSend(group, fmt.Sprintf("卡洛接受了「%s」的安利！有机会一起去尝尝看吧！", name))
 }
 
+func foodAddPrivate(id int64, name string, address string, description string) {
+	m := model.GetModel()
+	defer m.Close()
+
+	fd := param.Food{
+		Name:        name,
+		Address:     address,
+		Description: description,
+		Recommender: id,
+	}
+
+	if err := m.AddFood(fd); err != nil {
+		util.QQSend(id, constant.CarrotFoodAddFailed)
+		util.ErrorPrint(err, nil, "mongo")
+		return
+	}
+
+	util.QQSend(id, fmt.Sprintf("卡洛接受了「%s」的安利！有机会一起去尝尝看吧！", name))
+}
+
 func foodDelete(group int64, name string) {
 	m := model.GetModel()
 	defer m.Close()
@@ -171,12 +208,20 @@ func foodDelete(group int64, name string) {
 	util.QQGroupSend(group, fmt.Sprintf("「%s」被拔草啦！", name))
 }
 
-func foodRandByPlace(id int64, group int64, place string) {
+func foodRandByPlaceGroup(id int64, group int64, place string) {
 	util.QQGroupSendAtSomeone(group, id, getRandomFoodStringByPlace(place))
 }
 
-func foodRandAll(id int64, group int64) {
+func foodRandByPlacePrivate(id int64, place string) {
+	util.QQSend(id, getRandomFoodStringByPlace(place))
+}
+
+func foodRandAllGroup(id int64, group int64) {
 	util.QQGroupSendAtSomeone(group, id, getRandomFoodString())
+}
+
+func foodRandAllGroupPrivate(id int64) {
+	util.QQSend(id, getRandomFoodString())
 }
 
 func foodCheck(id int64, name string) {

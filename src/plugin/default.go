@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/constant"
 	"bug-carrot/controller"
 	"bug-carrot/param"
@@ -58,7 +59,11 @@ func (p *_default) IsMatchedPrivate(msg param.PrivateMessage) bool {
 // DoMatchedPrivate : 收到了想收到的私聊消息，要做什么呢？
 func (p *_default) DoMatchedPrivate(msg param.PrivateMessage) error {
 	if msg.SubType == "friend" {
-		util.QQSend(msg.UserId, constant.CarrotFriendNotAdmin)
+		if config.C.RiskControl {
+			util.QQSend(msg.UserId, constant.CarrotRiskControlAngry)
+		} else {
+			util.QQSend(msg.UserId, constant.CarrotFriendNotAdmin)
+		}
 	}
 	return nil
 }

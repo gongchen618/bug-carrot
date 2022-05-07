@@ -44,6 +44,9 @@ func (p *weather) DoTime() error {
 }
 
 func (p *weather) IsMatchedGroup(msg param.GroupMessage) bool {
+	if config.C.RiskControl {
+		return false
+	}
 	return msg.WordsMap.ExistWord("n", []string{"天气"})
 }
 func (p *weather) DoMatchedGroup(msg param.GroupMessage) error {
@@ -76,7 +79,7 @@ func WeatherPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "weather",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   true,
+			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: false,
 			FlagCanListen:         false,
 		},

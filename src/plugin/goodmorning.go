@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/constant"
 	"bug-carrot/controller"
 	"bug-carrot/param"
@@ -39,6 +40,9 @@ func (p *goodMorning) DoTime() error {
 }
 
 func (p *goodMorning) IsMatchedGroup(msg param.GroupMessage) bool {
+	if config.C.RiskControl {
+		return false
+	}
 	return msg.WordsMap.ExistWord("n", []string{"早安"})
 }
 func (p *goodMorning) DoMatchedGroup(msg param.GroupMessage) error {
@@ -46,7 +50,7 @@ func (p *goodMorning) DoMatchedGroup(msg param.GroupMessage) error {
 	ok, exist := p.PassHour[hour]
 	id := util.GetQQGroupUserId(msg)
 
-	// not night
+	// not morning
 	if !exist || !ok {
 		util.QQGroupSendAtSomeone(msg.GroupId, id, constant.CarrotGroupGoodMorningCheat)
 		return nil
@@ -71,9 +75,35 @@ func (p *goodMorning) DoMatchedGroup(msg param.GroupMessage) error {
 }
 
 func (p *goodMorning) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	return false
+	return config.C.RiskControl && msg.WordsMap.ExistWord("n", []string{"早安"})
 }
 func (p *goodMorning) DoMatchedPrivate(msg param.PrivateMessage) error {
+	hour, day := time.Now().Hour(), time.Now().Day()
+	ok, exist := p.PassHour[hour]
+	id := msg.UserId
+
+	// not morning
+	if !exist || !ok {
+		util.QQSend(id, constant.CarrotGroupGoodMorningCheat)
+		return nil
+	}
+
+	// already greeting
+	userDay, exist := p.UserDay[id]
+	if exist && userDay == day {
+		util.QQSend(id, constant.CarrotGroupGoodMorningRepeat)
+		return nil
+	}
+
+	//
+	p.UserDay[id] = day
+	if p.LastUserDay != day {
+		p.LastUserDay = day
+		util.QQSend(id, constant.CarrotGroupGoodMorningFirst)
+	} else {
+		util.QQSend(id, constant.CarrotGroupGoodMorning)
+	}
+
 	return nil
 }
 
@@ -93,8 +123,8 @@ func GoodMorningPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "goodMorning",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   true,
-			FlagCanMatchedPrivate: false,
+			FlagCanMatchedGroup:   !config.C.RiskControl,
+			FlagCanMatchedPrivate: config.C.RiskControl,
 			FlagCanListen:         false,
 		},
 		PassHour:    passHour,

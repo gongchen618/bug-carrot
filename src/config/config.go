@@ -13,10 +13,11 @@ var (
 )
 
 type Config struct {
-	App     app     `yaml:"app"`
-	MongoDB mongodb `yaml:"mongodb"`
-	QQBot   qqbot   `yaml:"qqbot"`
-	Plugin  plugin  `yaml:"plugin"`
+	App         app     `yaml:"app"`
+	MongoDB     mongodb `yaml:"mongodb"`
+	QQBot       qqbot   `yaml:"qqbot"`
+	Plugin      plugin  `yaml:"plugin"`
+	RiskControl bool    `yaml:"risk-control"`
 }
 
 type mongodb struct {

@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/controller"
 	"bug-carrot/param"
 	"bug-carrot/util"
@@ -50,6 +51,9 @@ func (p *repeat) DoMatchedPrivate(msg param.PrivateMessage) error {
 }
 
 func (p *repeat) Listen(msg param.GroupMessage) {
+	if config.C.RiskControl {
+		return
+	}
 	if msg.RawMessage == p.RepeatStr {
 		p.RepeatCnt++
 	} else {
@@ -71,7 +75,7 @@ func RepeatPluginRegister() {
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   false,
 			FlagCanMatchedPrivate: false,
-			FlagCanListen:         true,
+			FlagCanListen:         !config.C.RiskControl,
 		},
 		RepeatStr: "",
 		RepeatCnt: 0,

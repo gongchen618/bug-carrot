@@ -6,7 +6,8 @@ var ( // friend add
 )
 
 var ( // index
-	CarrotGroupPuzzled = "你好谢谢小笼包再见！"
+	CarrotGroupPuzzled     = "你好谢谢小笼包再见！"
+	CarrotRiskControlAngry = "腾讯你好！"
 )
 
 var ( // homework

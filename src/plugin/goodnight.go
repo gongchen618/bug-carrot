@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/constant"
 	"bug-carrot/controller"
 	"bug-carrot/param"
@@ -42,6 +43,9 @@ func (p *goodNight) DoTime() error {
 }
 
 func (p *goodNight) IsMatchedGroup(msg param.GroupMessage) bool {
+	if config.C.RiskControl {
+		return false
+	}
 	return msg.WordsMap.ExistWord("n", []string{"晚安"})
 }
 func (p *goodNight) DoMatchedGroup(msg param.GroupMessage) error {
@@ -79,9 +83,39 @@ func (p *goodNight) DoMatchedGroup(msg param.GroupMessage) error {
 }
 
 func (p *goodNight) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	return false
+	return config.C.RiskControl && msg.WordsMap.ExistWord("n", []string{"晚安"})
 }
 func (p *goodNight) DoMatchedPrivate(msg param.PrivateMessage) error {
+	hour, day := time.Now().Hour(), time.Now().Day()
+	ok, exist := p.PassHour[hour]
+	id := msg.UserId
+
+	// 处理 12 点之后是昨天
+	if hour <= p.TimeDividingLine {
+		d, _ := time.ParseDuration("-24h")
+		day = time.Now().Add(d).Day()
+	}
+
+	// not night
+	if !exist || !ok {
+		util.QQSend(id, constant.CarrotGroupGoodNightCheat)
+		return nil
+	}
+
+	// already greeting
+	userDay, exist := p.UserLastGoodNightDay[id]
+	if exist && userDay == day {
+		util.QQSend(id, constant.CarrotGroupGoodNightRepeat)
+		return nil
+	}
+
+	p.UserLastGoodNightDay[id] = day
+	if p.LastGoodNightDay != day {
+		p.LastGoodNightDay = day
+		util.QQSend(id, constant.CarrotGroupGoodNightFirst)
+	} else {
+		util.QQSend(id, constant.CarrotGroupGoodNight)
+	}
 	return nil
 }
 
@@ -134,9 +168,9 @@ func GoodNightPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "goodnight",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   true,
-			FlagCanMatchedPrivate: false,
-			FlagCanListen:         true,
+			FlagCanMatchedGroup:   !config.C.RiskControl,
+			FlagCanMatchedPrivate: config.C.RiskControl,
+			FlagCanListen:         !config.C.RiskControl,
 		},
 		PassHour:             passHour,
 		UserLastGoodNightDay: make(map[int64]int),
