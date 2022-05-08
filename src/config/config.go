@@ -18,6 +18,7 @@ type Config struct {
 	QQBot       qqbot   `yaml:"qqbot"`
 	Plugin      plugin  `yaml:"plugin"`
 	RiskControl bool    `yaml:"risk-control"`
+	DatabaseUse bool    `yaml:"database-use"`
 }
 
 type mongodb struct {
@@ -38,9 +39,14 @@ type qqbot struct {
 }
 
 type plugin struct {
+	Default  _default `yaml:"default"`
 	Weather  weather  `yaml:"weather"`
 	Homework homework `yaml:"homework"`
 	Food     food     `yaml:"food"`
+}
+
+type _default struct {
+	Admin int64 `yaml:"admin"`
 }
 
 type weather struct {

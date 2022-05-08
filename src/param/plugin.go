@@ -2,6 +2,7 @@ package param
 
 type PluginInterface interface { // 群聊消息插件
 	GetPluginName() string
+	GetPluginAuthor() string
 
 	CanTime() bool
 	IsTime() bool
@@ -17,6 +18,9 @@ type PluginInterface interface { // 群聊消息插件
 
 	CanListen() bool
 	Listen(msg GroupMessage)
+
+	NeedDatabase() bool
+	DoIgnoreRiskControl() bool
 	Close()
 }
 
@@ -31,10 +35,13 @@ type PrivateMessage struct {
 }
 
 type PluginIndex struct {
-	PluginName string
+	PluginName   string
+	PluginAuthor string
 
 	FlagCanTime           bool
 	FlagCanMatchedGroup   bool
 	FlagCanMatchedPrivate bool
 	FlagCanListen         bool
+	FlagUseDatabase       bool
+	FlagIgnoreRiskControl bool
 }

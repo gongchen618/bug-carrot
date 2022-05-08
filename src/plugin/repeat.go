@@ -16,6 +16,9 @@ type repeat struct {
 func (p *repeat) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *repeat) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *repeat) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -27,6 +30,12 @@ func (p *repeat) CanMatchedPrivate() bool {
 }
 func (p *repeat) CanListen() bool {
 	return p.Index.FlagCanListen
+}
+func (p *repeat) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *repeat) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
 }
 
 func (p *repeat) IsTime() bool {
@@ -72,10 +81,13 @@ func RepeatPluginRegister() {
 	p := &repeat{
 		Index: param.PluginIndex{
 			PluginName:            "repeat",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   false,
 			FlagCanMatchedPrivate: false,
 			FlagCanListen:         !config.C.RiskControl,
+			FlagUseDatabase:       false,
+			FlagIgnoreRiskControl: false,
 		},
 		RepeatStr: "",
 		RepeatCnt: 0,

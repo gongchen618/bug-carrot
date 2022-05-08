@@ -50,5 +50,8 @@ func getMongoDataBase(ctx context.Context) *mongo.Database {
 }
 
 func init() {
+	if !config.C.DatabaseUse {
+		return
+	}
 	connectMongo()
 }

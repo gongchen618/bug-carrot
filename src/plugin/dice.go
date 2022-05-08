@@ -21,6 +21,10 @@ type dice struct {
 func (p *dice) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *dice) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
+
 func (p *dice) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -33,6 +37,12 @@ func (p *dice) CanMatchedPrivate() bool {
 func (p *dice) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *dice) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *dice) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
 func (p *dice) IsTime() bool {
 	return false
@@ -42,9 +52,6 @@ func (p *dice) DoTime() error {
 }
 
 func (p *dice) IsMatchedGroup(msg param.GroupMessage) bool { // 占卜[name]
-	if config.C.RiskControl {
-		return false
-	}
 	if strings.HasPrefix(msg.RawMessage, p.DicePrefix) {
 		return true
 	}
@@ -147,10 +154,13 @@ func DicePluginRegister() {
 	p := &dice{
 		Index: param.PluginIndex{
 			PluginName:            "dice",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: config.C.RiskControl,
 			FlagCanListen:         false,
+			FlagUseDatabase:       false,
+			FlagIgnoreRiskControl: false,
 		},
 		DicePrefix: " 占卜",
 	}

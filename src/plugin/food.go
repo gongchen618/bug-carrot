@@ -25,6 +25,9 @@ type food struct {
 func (p *food) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *food) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *food) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -37,6 +40,12 @@ func (p *food) CanMatchedPrivate() bool {
 func (p *food) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *food) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *food) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
 func (p *food) IsTime() bool {
 	return false
@@ -46,9 +55,6 @@ func (p *food) DoTime() error {
 }
 
 func (p *food) IsMatchedGroup(msg param.GroupMessage) bool {
-	if config.C.RiskControl {
-		return false
-	}
 	if msg.Anonymous.Id != 0 { // 禁止匿名
 		return false
 	}
@@ -137,10 +143,13 @@ func FoodPluginRegister() {
 	p := &food{
 		Index: param.PluginIndex{
 			PluginName:            "food",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
+			FlagUseDatabase:       true,
+			FlagIgnoreRiskControl: false,
 		},
 		FoodAddPrefix:        " 安利",
 		FoodDeletePrefix:     " 拔草",

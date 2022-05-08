@@ -15,6 +15,9 @@ type _default struct {
 func (p *_default) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *_default) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *_default) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -27,8 +30,15 @@ func (p *_default) CanMatchedPrivate() bool {
 func (p *_default) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *_default) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *_default) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
-// 以上四个函数在注册时被唯一调用，并以此为依据加入相应的 queue
+// 以上六个函数在注册时被唯一调用，并以此为依据加入相应的 queue
+// 无需修改
 
 // IsTime : 是你需要的时间吗？
 func (p *_default) IsTime() bool {
@@ -47,7 +57,11 @@ func (p *_default) IsMatchedGroup(msg param.GroupMessage) bool {
 
 // DoMatchedGroup : 收到了想收到的群 @ 消息，要做什么呢？
 func (p *_default) DoMatchedGroup(msg param.GroupMessage) error {
-	util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), constant.CarrotGroupPuzzled)
+	if !config.C.RiskControl {
+		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), constant.CarrotGroupPuzzled)
+	} else {
+		util.QQSend(config.C.Plugin.Default.Admin, constant.CarrotRiskControlAngry)
+	}
 	return nil
 }
 
@@ -82,11 +96,14 @@ func (p *_default) Close() {
 func DefaultPluginRegister() {
 	p := &_default{
 		Index: param.PluginIndex{
-			PluginName:            "default", // 插件名称
-			FlagCanTime:           false,     // 是否能在特殊时间做出行为
-			FlagCanMatchedGroup:   true,      // 是否能回应群聊@消息
-			FlagCanMatchedPrivate: true,      // 是否能回应私聊消息
-			FlagCanListen:         false,     // 是否能监听群消息
+			PluginName:            "default",     // 插件名称
+			PluginAuthor:          "gongchen618", // 插件作者
+			FlagCanTime:           false,         // 是否能在特殊时间做出行为
+			FlagCanMatchedGroup:   true,          // 是否能回应群聊@消息
+			FlagCanMatchedPrivate: true,          // 是否能回应私聊消息
+			FlagCanListen:         false,         // 是否能监听群消息
+			FlagUseDatabase:       false,         // 是否用到了数据库
+			FlagIgnoreRiskControl: true,          // 是否无视风控，在不能发送群聊消息的情况下依然运行 group 相关内容(除了 default 插件，其余插件建议都设置为 false)
 		},
 	}
 	controller.PluginRegister(p)

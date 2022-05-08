@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bug-carrot/config"
 	"bug-carrot/param"
 	"fmt"
 	"github.com/sirupsen/logrus"
@@ -16,20 +17,34 @@ var (
 )
 
 func PluginRegister(p param.PluginInterface) {
+	if p.NeedDatabase() && !config.C.DatabaseUse {
+		fmt.Println(fmt.Sprintf("数据库缺失，插件 [%s]%s 未装载", p.GetPluginAuthor(), p.GetPluginName()))
+		return
+	}
 	if p.CanTime() {
 		PluginTime = append(PluginTime, p)
 	}
 	if p.CanMatchedGroup() {
-		PluginGroup = append(PluginGroup, p)
+		if !config.C.RiskControl || p.DoIgnoreRiskControl() {
+			PluginGroup = append(PluginGroup, p)
+		}
 	}
 	if p.CanMatchedPrivate() {
 		PluginPrivate = append(PluginPrivate, p)
 	}
 	if p.CanListen() {
-		PluginListen = append(PluginListen, p)
+		if !config.C.RiskControl || p.DoIgnoreRiskControl() {
+			PluginListen = append(PluginListen, p)
+		}
 	}
+
 	Plugin = append(Plugin, p)
-	fmt.Println(fmt.Sprintf("插件 %s 已装载", p.GetPluginName()))
+
+	if config.C.RiskControl && !p.DoIgnoreRiskControl() {
+		fmt.Println(fmt.Sprintf("当前位于风控场景，插件 [%s]%s 的群聊和监听功能未装载", p.GetPluginAuthor(), p.GetPluginName()))
+	} else {
+		fmt.Println(fmt.Sprintf("插件 [%s]%s 已装载", p.GetPluginAuthor(), p.GetPluginName()))
+	}
 }
 
 func WorkGroupMessagePlugins(msg param.GroupMessage) {

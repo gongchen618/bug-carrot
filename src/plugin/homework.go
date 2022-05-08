@@ -19,6 +19,9 @@ type homework struct {
 func (p *homework) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *homework) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *homework) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -31,6 +34,12 @@ func (p *homework) CanMatchedPrivate() bool {
 func (p *homework) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *homework) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *homework) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
 func (p *homework) IsTime() bool {
 	return false
@@ -40,9 +49,6 @@ func (p *homework) DoTime() error {
 }
 
 func (p *homework) IsMatchedGroup(msg param2.GroupMessage) bool {
-	if config.C.RiskControl {
-		return false
-	}
 	return msg.WordsMap.ExistWord("n", []string{"作业"})
 }
 func (p *homework) DoMatchedGroup(msg param2.GroupMessage) error { // 还没写具体科目查询(心虚)
@@ -111,10 +117,13 @@ func HomeworkPluginRegister() {
 	p := &homework{
 		Index: param2.PluginIndex{
 			PluginName:            "homework",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
+			FlagUseDatabase:       true,
+			FlagIgnoreRiskControl: false,
 		},
 	}
 	controller.PluginRegister(p)

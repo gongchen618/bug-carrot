@@ -19,6 +19,9 @@ type goodMorning struct {
 func (p *goodMorning) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *goodMorning) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *goodMorning) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -31,6 +34,12 @@ func (p *goodMorning) CanMatchedPrivate() bool {
 func (p *goodMorning) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *goodMorning) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *goodMorning) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
 func (p *goodMorning) IsTime() bool {
 	return false
@@ -40,9 +49,6 @@ func (p *goodMorning) DoTime() error {
 }
 
 func (p *goodMorning) IsMatchedGroup(msg param.GroupMessage) bool {
-	if config.C.RiskControl {
-		return false
-	}
 	return msg.WordsMap.ExistWord("n", []string{"早安"})
 }
 func (p *goodMorning) DoMatchedGroup(msg param.GroupMessage) error {
@@ -122,10 +128,13 @@ func GoodMorningPluginRegister() {
 	p := &goodMorning{
 		Index: param.PluginIndex{
 			PluginName:            "goodMorning",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: config.C.RiskControl,
 			FlagCanListen:         false,
+			FlagUseDatabase:       false,
+			FlagIgnoreRiskControl: false,
 		},
 		PassHour:    passHour,
 		UserDay:     make(map[int64]int),

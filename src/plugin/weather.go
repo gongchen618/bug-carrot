@@ -23,6 +23,9 @@ type weather struct {
 func (p *weather) GetPluginName() string {
 	return p.Index.PluginName
 }
+func (p *weather) GetPluginAuthor() string {
+	return p.Index.PluginAuthor
+}
 func (p *weather) CanTime() bool {
 	return p.Index.FlagCanTime
 }
@@ -35,6 +38,12 @@ func (p *weather) CanMatchedPrivate() bool {
 func (p *weather) CanListen() bool {
 	return p.Index.FlagCanListen
 }
+func (p *weather) NeedDatabase() bool {
+	return p.Index.FlagUseDatabase
+}
+func (p *weather) DoIgnoreRiskControl() bool {
+	return p.Index.FlagIgnoreRiskControl
+}
 
 func (p *weather) IsTime() bool {
 	return false
@@ -44,9 +53,6 @@ func (p *weather) DoTime() error {
 }
 
 func (p *weather) IsMatchedGroup(msg param.GroupMessage) bool {
-	if config.C.RiskControl {
-		return false
-	}
 	return msg.WordsMap.ExistWord("n", []string{"天气"})
 }
 func (p *weather) DoMatchedGroup(msg param.GroupMessage) error {
@@ -78,10 +84,13 @@ func WeatherPluginRegister() {
 	p := &weather{
 		Index: param.PluginIndex{
 			PluginName:            "weather",
+			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   !config.C.RiskControl,
 			FlagCanMatchedPrivate: false,
 			FlagCanListen:         false,
+			FlagUseDatabase:       false,
+			FlagIgnoreRiskControl: false,
 		},
 	}
 	controller.PluginRegister(p)

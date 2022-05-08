@@ -12,6 +12,8 @@ qqbot:
   qq: 927207059
 
 plugin:
+  default:
+    admin: 2039799616z
   weather:
     host: "https://api.seniverse.com/v3/weather/daily.json"
     token: "SRw2t5tNFjmvTEkF2"
@@ -22,4 +24,5 @@ plugin:
     admin: 2039799616
     group: 923300200
 
-risk-control: true
+risk-control: true # 当前风控，群聊功能关闭
+database-use: false # 测试环境没有运行 mongo 数据库
