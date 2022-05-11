@@ -74,7 +74,7 @@ func (p *codeforces) DoMatchedGroup(msg param.GroupMessage) error {
 
 // IsMatchedPrivate : 是你想收到的私聊消息吗？
 func (p *codeforces) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	return true
+	return msg.WordsMap.ExistWord("eng", []string{"cf", "codeforces"})
 }
 
 // DoMatchedPrivate : 收到了想收到的私聊消息，要做什么呢？
@@ -83,10 +83,6 @@ func (p *codeforces) DoMatchedPrivate(msg param.PrivateMessage) error {
 		if config.C.RiskControl {
 			util.QQSend(msg.UserId, constant.CarrotRiskControlAngry)
 		} else {
-			if !msg.WordsMap.ExistWord("eng", []string{"cf", "codeforces"}) {
-				util.QQSend(msg.UserId, constant.CarrotFriendNotAdmin)
-				return nil
-			}
 			util.QQSend(msg.UserId, getCodeforcesContestList())
 		}
 	}
