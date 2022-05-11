@@ -8,6 +8,7 @@
 - [x] homework 作业
 - [x] repeat 复读
 - [x] weather 天气
+- [x] codeforces 未来比赛列表
 
 ## Q&A
 
