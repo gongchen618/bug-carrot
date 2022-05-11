@@ -83,7 +83,11 @@ func (p *codeforces) DoMatchedPrivate(msg param.PrivateMessage) error {
 		if config.C.RiskControl {
 			util.QQSend(msg.UserId, constant.CarrotRiskControlAngry)
 		} else {
-			util.QQSend(msg.UserId, constant.CarrotFriendNotAdmin)
+			if !msg.WordsMap.ExistWord("eng", []string{"cf", "codeforces"}) {
+				util.QQSend(msg.UserId, constant.CarrotFriendNotAdmin)
+				return nil
+			}
+			util.QQSend(msg.UserId, getCodeforcesContestList())
 		}
 	}
 	return nil
@@ -108,7 +112,7 @@ func CodeforcesPluginRegister() {
 			PluginAuthor:          "ligen131",
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   false,
-			FlagCanMatchedPrivate: false,
+			FlagCanMatchedPrivate: true,
 			FlagCanListen:         true,
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
@@ -131,7 +135,6 @@ func getCodeforcesContestList() string {
 		util.ErrorPrint(err, nil, "[Goforces] Failed to get contests list.")
 		return "Failed to get contests list. Please try again later."
 	}
-	fmt.Printf("%v %v %v\n", contestList[0].Before(), contestList[0].Finished(), contestList[0].ContestURL())
 	ListLen := len(contestList)
 	text := "Codeforces Upcoming Contests:"
 	tot := 0
@@ -140,7 +143,7 @@ func getCodeforcesContestList() string {
 			tot++
 			dur, _ := time.ParseDuration(fmt.Sprintf("%ds", contestList[i].DurationSeconds))
 			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05") // Do not change this time
-			text += fmt.Sprintf("\n\n%d. %v\n%v, Duration: %v", tot, contestList[i].Name, st, dur)
+			text += fmt.Sprintf("\n\n%d. %v\n%v, Duration: %v\n%v", tot, contestList[i].Name, st, dur, contestList[i].ContestURL())
 		}
 	}
 	if tot == 0 {
