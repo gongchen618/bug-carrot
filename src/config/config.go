@@ -1,11 +1,12 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -65,7 +66,7 @@ type food struct {
 }
 
 func init() {
-	configFile := "config/default.yml"
+	configFile := "config/user.yml"
 
 	// 如果设置了
 	if v, ok := os.LookupEnv("CONFIG"); ok {
