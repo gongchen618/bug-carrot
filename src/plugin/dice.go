@@ -1,21 +1,22 @@
 package plugin
 
 import (
-	"bug-carrot/config"
 	"bug-carrot/constant"
 	"bug-carrot/controller"
 	"bug-carrot/param"
 	"bug-carrot/util"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
+	"strconv"
 	"strings"
-	"time"
 	"unicode"
 )
 
 type dice struct {
-	Index      param.PluginIndex
-	DicePrefix string
+	Index          param.PluginIndex
+	DicePrefix     string
+	DividingString string
 }
 
 func (p *dice) GetPluginName() string {
@@ -59,6 +60,18 @@ func (p *dice) IsMatchedGroup(msg param.GroupMessage) bool { // 占卜[name]
 }
 func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 	topic := msg.RawMessage[len(p.DicePrefix):]
+	limitTag := false
+	limit := int64(0)
+	var err error
+	if strings.Count(topic, p.DividingString) == 1 {
+		str := strings.Split(topic, p.DividingString)
+		topic = str[0]
+		limit, err = strconv.ParseInt(str[1], 10, 64)
+		if err == nil && limit > 0 {
+			limitTag = true
+		}
+	} // 占卜topic#number
+
 	for _, ch := range topic {
 		if !unicode.Is(unicode.Han, ch) && !unicode.IsLetter(ch) && !unicode.IsNumber(ch) {
 			util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), constant.CarrotDiceStrangeInput)
@@ -71,75 +84,51 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 		return nil
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	rd := rand.Intn(101)
+	if limitTag { // 有上界的占卜
+		rd, err := rand.Int(rand.Reader, big.NewInt(limit+1))
+		if err != nil { // 在最上面检验了 limit 是否为正数，所以这个 err 应该恒为 nil
+			rd = big.NewInt(0)
+		}
+		star := rd.Int64()
+		diceResultMessage := fmt.Sprintf("#卡洛对 %d 个星球使用了占卜术，发现与事件「%s」拥有最契合运势的是小行星 %d 号。这意味着什么呢？", limit, topic, star)
+		util.QQGroupSend(msg.GroupId, diceResultMessage)
+
+		return nil
+	}
+
+	rd, err := rand.Int(rand.Reader, big.NewInt(101))
+	if err != nil {
+		rd = big.NewInt(0)
+	}
+	star := rd.Int64()
 	var rdLevelMessage string
 	switch {
-	case rd == 100:
+	case star == 100:
 		rdLevelMessage = constant.CarrotDiceSuccessFullPoint
-	case rd >= 95:
+	case star >= 95:
 		rdLevelMessage = constant.CarrotDiceSuccessGold
-	case rd >= 85:
+	case star >= 85:
 		rdLevelMessage = constant.CarrotDiceSuccessSilver
-	case rd >= 60:
+	case star >= 60:
 		rdLevelMessage = constant.CarrotDiceSuccessBronze
-	case rd >= 40:
+	case star >= 40:
 		rdLevelMessage = constant.CarrotDiceFailedGold
-	case rd > 0:
+	case star > 0:
 		rdLevelMessage = constant.CarrotDiceFailedSilver
-	case rd == 0:
+	case star == 0:
 		rdLevelMessage = constant.CarrotDiceFailedZeroPoint
 	}
 
-	diceResultMessage := fmt.Sprintf("#卡洛对事件「%s」使用了占卜术，一共有 %d 颗星星被点亮，星象显示「%s」", topic, rd, rdLevelMessage)
+	diceResultMessage := fmt.Sprintf("#卡洛对事件「%s」使用了占卜术，一共有 %d 颗星星被点亮，星象显示「%s」", topic, star, rdLevelMessage)
 	util.QQGroupSend(msg.GroupId, diceResultMessage)
 
 	return nil
 }
 
 func (p *dice) IsMatchedPrivate(msg param.PrivateMessage) bool {
-	if config.C.RiskControl && strings.HasPrefix(msg.RawMessage, p.DicePrefix[1:]) {
-		return true
-	}
 	return false
 }
 func (p *dice) DoMatchedPrivate(msg param.PrivateMessage) error {
-	topic := msg.RawMessage[len(p.DicePrefix[1:]):]
-	for _, ch := range topic {
-		if !unicode.Is(unicode.Han, ch) && !unicode.IsLetter(ch) && !unicode.IsNumber(ch) {
-			util.QQSend(msg.UserId, constant.CarrotDiceStrangeInput)
-			return nil
-		}
-	}
-
-	if len(topic) == 0 {
-		util.QQSend(msg.UserId, constant.CarrotDiceEmptyTopic)
-		return nil
-	}
-
-	rand.Seed(time.Now().UnixNano())
-	rd := rand.Intn(101)
-	var rdLevelMessage string
-	switch {
-	case rd == 100:
-		rdLevelMessage = constant.CarrotDiceSuccessFullPoint
-	case rd >= 95:
-		rdLevelMessage = constant.CarrotDiceSuccessGold
-	case rd >= 85:
-		rdLevelMessage = constant.CarrotDiceSuccessSilver
-	case rd >= 60:
-		rdLevelMessage = constant.CarrotDiceSuccessBronze
-	case rd >= 40:
-		rdLevelMessage = constant.CarrotDiceFailedGold
-	case rd > 0:
-		rdLevelMessage = constant.CarrotDiceFailedSilver
-	case rd == 0:
-		rdLevelMessage = constant.CarrotDiceFailedZeroPoint
-	}
-
-	diceResultMessage := fmt.Sprintf("#卡洛对事件「%s」使用了占卜术，一共有 %d 颗星星被点亮，星象显示「%s」", topic, rd, rdLevelMessage)
-	util.QQSend(msg.UserId, diceResultMessage)
-
 	return nil
 }
 
@@ -156,13 +145,14 @@ func DicePluginRegister() {
 			PluginName:            "dice",
 			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   !config.C.RiskControl,
-			FlagCanMatchedPrivate: config.C.RiskControl,
+			FlagCanMatchedGroup:   true,
+			FlagCanMatchedPrivate: false,
 			FlagCanListen:         false,
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
 		},
-		DicePrefix: " 占卜",
+		DicePrefix:     " 占卜",
+		DividingString: "#",
 	}
 	controller.PluginRegister(p)
 }
