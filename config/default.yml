@@ -1,3 +1,4 @@
+# 本文件为本地测试配置
 app:
   addr: ":3456"
   prefix: "/api"
@@ -7,23 +8,22 @@ mongodb:
   password: "123"
   database: "carrot"
 qqbot:
-  #hosdt: "http://106.52.43.175:5700"
-  name: "middleware"
+  name: "middleware" # 修改为你的 QQ bot 名字
   host: "http://127.0.0.1:5701"
-  qq: 927207059
+  qq: 100000000 # 修改为你的 QQ bot 账号
 
 plugin:
   default:
-    admin: 2039799616
+    admin: 100000000 # 修改为你的 QQ 账号
   weather:
     host: "https://api.seniverse.com/v3/weather/daily.json"
     token: "SRw2t5tNFjmvTEkF2"
   homework:
-    admin: 2039799616
-    group: 923300200
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 100000000 # 修改为你的测试群聊
   food:
-    admin: 2039799616
-    group: 923300200
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 100000000 # 修改为你的测试群聊
 
 risk-control: false # 当前风控，群聊功能关闭
 database-use: false # 测试环境没有运行 mongo 数据库

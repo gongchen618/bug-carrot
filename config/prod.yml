@@ -1,3 +1,4 @@
+# 本文件为部署配置
 app:
   addr: ":3456"
   prefix: "/api"

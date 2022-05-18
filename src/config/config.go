@@ -1,11 +1,12 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -34,7 +35,7 @@ type app struct {
 }
 
 type qqbot struct {
-	Name string `yaml:"names"`
+	Name string `yaml:"name"`
 	Host string `yaml:"host"`
 	QQ   int64  `yaml:"qq"`
 }

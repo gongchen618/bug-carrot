@@ -6,11 +6,12 @@ import (
 	"bug-carrot/plugin"
 	"bug-carrot/router"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/labstack/echo/v4"
 )
 
 // main 是项目主入口
@@ -37,6 +38,7 @@ func pluginRegister() {
 	plugin.GoodMorningPluginRegister() // 早安
 	plugin.GoodNightPluginRegister()   // 晚安
 	plugin.RepeatPluginRegister()      // 重复
+	plugin.CodeforcesPluginRegister()
 
 	plugin.DefaultPluginRegister() // 默认回复
 }
