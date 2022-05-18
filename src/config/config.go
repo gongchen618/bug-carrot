@@ -1,11 +1,12 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
