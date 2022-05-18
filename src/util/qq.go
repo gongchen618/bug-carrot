@@ -4,11 +4,11 @@ import (
 	"bug-carrot/config"
 	"bug-carrot/param"
 	"bytes"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 // QQApproveFriendAddRequest 通过好友申请
@@ -124,12 +124,37 @@ func GetQQGroupUserId(msg param.GroupMessage) int64 {
 	return userId
 }
 
+var emojiInvalid map[int64]bool
+
 // packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
-	data := rand.Int63n(222)
-	return fmt.Sprintf("%s[CQ:face,id=%d]", message, data)
+	emoji, err := rand.Int(rand.Reader, big.NewInt(222))
+	if err != nil {
+		emoji = big.NewInt(0) // [惊讶]
+	} else {
+		invalid, exist := emojiInvalid[emoji.Int64()]
+		if exist && invalid {
+			emoji = big.NewInt(0) // [惊讶]
+		}
+	}
+	return fmt.Sprintf("%s[CQ:face,id=%d]", message, emoji)
+}
+
+func markInvalidEmoji() {
+	emojiInvalid = make(map[int64]bool)
+	invalid := []int64{17,
+		40, 44, 45, 47, 48,
+		51, 52, 58,
+		62, 65, 68,
+		70, 71, 72, 73,
+		80, 82, 83, 84, 87, 88,
+		90, 91, 92, 93, 94, 95,
+	}
+	for _, e := range invalid {
+		emojiInvalid[e] = true
+	}
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	markInvalidEmoji()
 }
