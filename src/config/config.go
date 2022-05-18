@@ -66,7 +66,7 @@ type food struct {
 }
 
 func init() {
-	configFile := "config/user.yml"
+	configFile := "config/default.yml"
 
 	// 如果设置了
 	if v, ok := os.LookupEnv("CONFIG"); ok {
