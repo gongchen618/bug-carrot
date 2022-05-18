@@ -106,9 +106,15 @@ func groupMessageHandler(c echo.Context) error {
 		return context.Error(c, http.StatusBadRequest, "bad request", err)
 	}
 
-	pref := fmt.Sprintf("[CQ:at,qq=%d]", config.C.QQBot.QQ)
-	if strings.HasPrefix(req.RawMessage, pref) {
-		message := req.RawMessage[len(pref):]
+	prefA := fmt.Sprintf("[CQ:at,qq=%d]", config.C.QQBot.QQ)
+	prefT := fmt.Sprintf("@%s", config.C.QQBot.Name)
+	if strings.HasPrefix(req.RawMessage, prefA) || strings.HasPrefix(req.RawMessage, prefT) {
+		var message string
+		if strings.HasPrefix(req.RawMessage, prefA) {
+			message = req.RawMessage[len(prefA):]
+		} else {
+			message = req.RawMessage[len(prefT):]
+		}
 		r := param.GroupMessage{
 			RequestGroupMessage: param.RequestGroupMessage{
 				SubType:    req.SubType,

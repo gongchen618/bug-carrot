@@ -34,6 +34,7 @@ type app struct {
 }
 
 type qqbot struct {
+	Name string `yaml:"names"`
 	Host string `yaml:"host"`
 	QQ   int64  `yaml:"qq"`
 }
