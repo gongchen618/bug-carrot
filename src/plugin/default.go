@@ -57,10 +57,9 @@ func (p *_default) IsMatchedGroup(msg param.GroupMessage) bool {
 
 // DoMatchedGroup : 收到了想收到的群 @ 消息，要做什么呢？
 func (p *_default) DoMatchedGroup(msg param.GroupMessage) error {
-	if !config.C.RiskControl {
+	if !config.C.RiskControl { // 备注：这里 RiskControl 的全局变量用于风控
+		// 在 bot 运行已经稳定的场景下，我们认为新增的插件将此变量忽略掉是可以接受的
 		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), constant.CarrotGroupPuzzled)
-	} else {
-		util.QQSend(config.C.Plugin.Default.Admin, constant.CarrotRiskControlAngry)
 	}
 	return nil
 }
@@ -71,6 +70,7 @@ func (p *_default) IsMatchedPrivate(msg param.PrivateMessage) bool {
 }
 
 // DoMatchedPrivate : 收到了想收到的私聊消息，要做什么呢？
+// 备注：我们建议大部分功能只对群聊开启，增强 bot 在群聊中的存在感，私聊功能可以提供给管理员
 func (p *_default) DoMatchedPrivate(msg param.PrivateMessage) error {
 	if msg.SubType == "friend" {
 		if config.C.RiskControl {
@@ -83,6 +83,8 @@ func (p *_default) DoMatchedPrivate(msg param.PrivateMessage) error {
 }
 
 // Listen : 监听到非 @ 的群消息，要做什么呢？
+// 备注：我们建议只对极少数的功能采取监听行为
+// 除去整活效果较好的特殊场景，我们一般希望 bot 只有在被 @ 到的时候才会对应s发言
 func (p *_default) Listen(msg param.GroupMessage) {
 
 }
@@ -103,7 +105,7 @@ func DefaultPluginRegister() {
 			FlagCanMatchedPrivate: true,          // 是否能回应私聊消息
 			FlagCanListen:         false,         // 是否能监听群消息
 			FlagUseDatabase:       false,         // 是否用到了数据库
-			FlagIgnoreRiskControl: true,          // 是否无视风控，在不能发送群聊消息的情况下依然运行 group 相关内容(除了 default 插件，其余插件建议都设置为 false)
+			FlagIgnoreRiskControl: true,          // 是否无视风控（为 true 且 RiskControl=true 时将自动无视群聊功能，建议设置为 false）
 		},
 	}
 	controller.PluginRegister(p)
