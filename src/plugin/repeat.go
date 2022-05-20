@@ -85,7 +85,7 @@ func RepeatPluginRegister() {
 			FlagCanTime:           false,
 			FlagCanMatchedGroup:   false,
 			FlagCanMatchedPrivate: false,
-			FlagCanListen:         !config.C.RiskControl,
+			FlagCanListen:         true,
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
 		},

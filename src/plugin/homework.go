@@ -119,7 +119,7 @@ func HomeworkPluginRegister() {
 			PluginName:            "homework",
 			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   !config.C.RiskControl,
+			FlagCanMatchedGroup:   true,
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
 			FlagUseDatabase:       true,

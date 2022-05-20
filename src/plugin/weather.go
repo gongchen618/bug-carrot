@@ -86,7 +86,7 @@ func WeatherPluginRegister() {
 			PluginName:            "weather",
 			PluginAuthor:          "gongchen618",
 			FlagCanTime:           false,
-			FlagCanMatchedGroup:   !config.C.RiskControl,
+			FlagCanMatchedGroup:   true,
 			FlagCanMatchedPrivate: false,
 			FlagCanListen:         false,
 			FlagUseDatabase:       false,

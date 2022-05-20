@@ -90,7 +90,7 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 			rd = big.NewInt(0)
 		}
 		star := rd.Int64() + 1 // 下界从 1 开始
-		diceResultMessage := fmt.Sprintf("#卡洛对 %d 个星球使用了占卜术，发现与事件「%s」拥有最契合运势的是小行星 %d 号。这意味着什么呢？", limit, topic, star)
+		diceResultMessage := fmt.Sprintf("#卡洛对 %d 颗星星使用了占卜术，发现与事件「%s」最契合的是小行星 %d 号...这意味着什么呢？", limit, topic, star)
 		util.QQGroupSend(msg.GroupId, diceResultMessage)
 
 		return nil
@@ -151,7 +151,7 @@ func DicePluginRegister() {
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
 		},
-		DicePrefix:     " 占卜",
+		DicePrefix:     "占卜",
 		DividingString: "#",
 	}
 	controller.PluginRegister(p)

@@ -115,6 +115,7 @@ func groupMessageHandler(c echo.Context) error {
 		} else {
 			message = req.RawMessage[len(prefT):]
 		}
+		message = strings.TrimLeft(message, " ")
 		r := param.GroupMessage{
 			RequestGroupMessage: param.RequestGroupMessage{
 				SubType:    req.SubType,
