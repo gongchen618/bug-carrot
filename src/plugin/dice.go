@@ -85,11 +85,11 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 	}
 
 	if limitTag { // 有上界的占卜
-		rd, err := rand.Int(rand.Reader, big.NewInt(limit+1))
+		rd, err := rand.Int(rand.Reader, big.NewInt(limit))
 		if err != nil { // 在最上面检验了 limit 是否为正数，所以这个 err 应该恒为 nil
 			rd = big.NewInt(0)
 		}
-		star := rd.Int64()
+		star := rd.Int64() + 1 // 下界从 1 开始
 		diceResultMessage := fmt.Sprintf("#卡洛对 %d 个星球使用了占卜术，发现与事件「%s」拥有最契合运势的是小行星 %d 号。这意味着什么呢？", limit, topic, star)
 		util.QQGroupSend(msg.GroupId, diceResultMessage)
 
