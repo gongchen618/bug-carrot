@@ -45,6 +45,7 @@ type plugin struct {
 	Weather  weather  `yaml:"weather"`
 	Homework homework `yaml:"homework"`
 	Food     food     `yaml:"food"`
+	Schedule schedule `yaml:"schedule"`
 }
 
 type _default struct {
@@ -62,6 +63,11 @@ type homework struct {
 }
 
 type food struct {
+	Admin int64 `yaml:"admin"`
+	Group int64 `yaml:"group"`
+}
+
+type schedule struct {
 	Admin int64 `yaml:"admin"`
 	Group int64 `yaml:"group"`
 }

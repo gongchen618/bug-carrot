@@ -24,6 +24,9 @@ plugin:
   food:
     admin: 2039799616
     group: 923300200
+  schedule:
+    admin: 2039799616
+    group: 923300200
 
 risk-control: false # 当前风控，群聊功能关闭
 database-use: true # 测试环境是否运行 mongo 数据库

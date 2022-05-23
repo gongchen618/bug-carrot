@@ -69,40 +69,32 @@ func (p *homework) DoMatchedGroup(msg param2.GroupMessage) error { // 还没写�
 }
 
 func (p *homework) IsMatchedPrivate(msg param2.PrivateMessage) bool {
-	if config.C.RiskControl && msg.WordsMap.ExistWord("n", []string{"作业"}) {
-		return true
-	}
 	return msg.UserId == config.C.Plugin.Homework.Admin && strings.HasPrefix(msg.RawMessage, "作业")
 }
 func (p *homework) DoMatchedPrivate(msg param2.PrivateMessage) error { // 格式：作业 xx xx xx
-	if msg.UserId == config.C.Plugin.Homework.Admin && strings.HasPrefix(msg.RawMessage, "作业") {
-		str := strings.Split(msg.RawMessage, " ") // 没有考虑错误情况 因为是 admin private message
-		if len(str) >= 2 {
-			switch str[1] {
-			case "delete":
-				if len(str) >= 4 {
-					homeworkDelete(msg.UserId, str[2], str[3])
-					return nil
-				}
-			case "add":
-				if len(str) >= 4 {
-					homeworkAdd(msg.UserId, str[2], str[3])
-					return nil
-				}
-			case "show":
-				homeworkShow(msg.UserId)
-				return nil
-			case "clear":
-				homeworkClear(msg.UserId)
+	str := strings.Split(msg.RawMessage, " ") // 没有考虑错误情况 因为是 admin private message
+	if len(str) >= 2 {
+		switch str[1] {
+		case "delete":
+			if len(str) >= 4 {
+				homeworkDelete(msg.UserId, str[2], str[3])
 				return nil
 			}
+		case "add":
+			if len(str) >= 4 {
+				homeworkAdd(msg.UserId, str[2], str[3])
+				return nil
+			}
+		case "show":
+			homeworkShow(msg.UserId)
+			return nil
+		case "clear":
+			homeworkClear(msg.UserId)
+			return nil
 		}
-
-		util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
-	} else if config.C.RiskControl && msg.WordsMap.ExistWord("n", []string{"作业"}) {
-		util.QQSend(msg.UserId, getHomeworkString())
-		return nil
 	}
+
+	util.QQSend(msg.UserId, constant.CarrotGroupPuzzled)
 	return nil
 }
 

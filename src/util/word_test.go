@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 var messages = []string{
@@ -13,6 +14,10 @@ var messages = []string{
 	//"微积分作业是什么",
 	//"reset微积分",
 	//"submit微积分",
+	"近期考试",
+	"近期竞赛",
+	"班级活动",
+	"学校活动",
 	"卡洛早安",
 	"卡洛晚安",
 	"卡洛喜欢吃萝卜吗",
@@ -21,9 +26,11 @@ var messages = []string{
 	"大学物理作业是什么呢",
 	"离散数学是坏的",
 	"卡洛知道明天武汉的天气吗?",
-	"卡洛知道这几天的天气吗",
-	"卡洛这三天天气",
 	"卡洛这两天的天气是什么",
+	"任务清单",
+	"TODO清单",
+	"约定",
+	"这是一份约定",
 }
 
 func TestGetWordsFromString(t *testing.T) {
@@ -40,3 +47,13 @@ func TestGetWordsFromString(t *testing.T) {
 [{x 卡洛} {r 这} {m 三天} {n 天气}]
 [{x 卡洛} {r 这} {m 两天} {uj 的} {n 天气} {v 是} {r 什么}]
 */
+
+func TestTimePattern(t *testing.T) {
+	timePattern := "2006年01月02日15:04"
+	dateStr := "2022年02月03日03:14"
+	date, err := time.ParseInLocation(timePattern, dateStr, time.Local)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(date)
+}

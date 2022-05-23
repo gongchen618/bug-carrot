@@ -10,6 +10,7 @@ type Model interface {
 	Close()
 	HomeworkInterface
 	FoodInterface
+	ScheduleInterface
 }
 
 type model struct {

@@ -73,3 +73,17 @@ var ( // food
 	CarrotFoodInfoGetFailed = "有人又写出 bug 啦！"
 	CarrotFoodInfoGetEmpty  = "好像没有这个安利？"
 )
+
+var ( // schedule
+	CarrotScheduleDeleteFailed   = "不可以删掉哦"
+	CarrotScheduleDeleteSuccess  = "一个重要的约定逝去了..."
+	CarrotScheduleUpdatedSuccess = "约定被修改啦！"
+
+	CarrotScheduleAddFailed  = "今天的天气，似乎不适合做约定呢"
+	CarrotScheduleAddSuccess = "说好啦！卡洛会永远记住这个约定的！"
+
+	CarrotScheduleShowFailed  = "好像出现了什么问题..."
+	CarrotScheduleShowEmpty   = "和卡洛许下的约定，已经全部实现了喲！"
+	CarrotScheduleNotFound    = "你说的约定不存在哦~"
+	CarrotScheduleShowSuccess = "卡洛和大家的约定清单！"
+)
