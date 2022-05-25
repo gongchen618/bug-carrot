@@ -228,7 +228,7 @@ func SchedulePluginRegister() {
 			FlagCanMatchedGroup:   true,          // 是否能回应群聊@消息
 			FlagCanMatchedPrivate: true,          // 是否能回应私聊消息
 			FlagCanListen:         false,         // 是否能监听群消息
-			FlagUseDatabase:       false,         // 是否用到了数据库（配置文件中配置不使用数据库的话，用到了数据库的插件会不运行）
+			FlagUseDatabase:       true,          // 是否用到了数据库（配置文件中配置不使用数据库的话，用到了数据库的插件会不运行）
 			FlagIgnoreRiskControl: false,         // 是否无视风控（为 true 且 RiskControl=true 时将自动无视群聊功能，建议设置为 false）
 		},
 		lasQuater: -1,
