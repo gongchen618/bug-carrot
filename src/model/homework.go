@@ -25,8 +25,6 @@ type HomeworkInterface interface {
 }
 
 func (m *model) AddHomework(homework param.Homework) error {
-	homework.CreateTime = time.Now()
-
 	filter := bson.M{"context": homework.Context}
 	update := bson.M{"$setOnInsert": homework}
 
