@@ -9,14 +9,15 @@ import (
 	"bug-carrot/util"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
+	"math"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type schedule struct {
-	Index   param.PluginIndex
-	lasWeek int
+	Index     param.PluginIndex
+	lasQuater int
 }
 
 func (p *schedule) GetPluginName() string {
@@ -45,16 +46,41 @@ func (p *schedule) DoIgnoreRiskControl() bool {
 }
 
 func (p *schedule) IsTime() bool {
-	_, _, week := time.Now().Date()
-	if week != p.lasWeek {
-		p.lasWeek = week
+	if time.Now().Weekday() == time.Monday {
 		return true
+	} // 每周一发一次
+
+	if p.lasQuater == time.Now().Minute()/15 {
+		return false
+	} // 每 15 分钟检查一次近期约定
+	p.lasQuater = time.Now().Minute() / 15
+
+	m := model.GetModel()
+	defer m.Close()
+
+	schedules, err := m.GetScheduleAllFromNow()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false
+		}
+		util.ErrorPrint(err, nil, "mongo")
+		return false
 	}
+
+	for _, object := range schedules {
+		duration := time.Now().Sub(object.Date.Local()).Hours()
+		if math.Abs(duration) < 24 && object.Alarm24hFlag == false {
+			return true
+		} else if math.Abs(duration) < 1 && object.Alarm1hFlag == false {
+			return true
+		}
+	}
+
 	return false
 }
 
 func (p *schedule) DoTime() error {
-	util.QQGroupSend(config.C.Plugin.Schedule.Group, getScheduleStringAllFromNow())
+	util.QQGroupSend(config.C.Plugin.Schedule.Group, getScheduleStringRecent())
 	return nil
 }
 
@@ -154,7 +180,7 @@ func (p *schedule) DoMatchedPrivate(msg param.PrivateMessage) error { // 格式�
 				return nil
 			}
 		case "show": // show (title) page limit
-			if len(str) == 3 {
+			if len(str) == 5 {
 				page, err := strconv.ParseInt(str[3], 10, 64)
 				if err != nil {
 					page = 0
@@ -189,12 +215,11 @@ func (p *schedule) Close() {
 
 var (
 	timePattern        = "2006/01/02/15:04" // time parse pattern
-	timePatternSimple  = "1-2-Mon"
+	timePatternSimple  = "1-2 Mon"
 	timePatternComplex = "01月02日15:04,Monday"
 )
 
 func SchedulePluginRegister() {
-	_, _, week := time.Now().Date()
 	p := &schedule{
 		Index: param.PluginIndex{
 			PluginName:            "schedule",    // 插件名称
@@ -206,7 +231,7 @@ func SchedulePluginRegister() {
 			FlagUseDatabase:       false,         // 是否用到了数据库（配置文件中配置不使用数据库的话，用到了数据库的插件会不运行）
 			FlagIgnoreRiskControl: false,         // 是否无视风控（为 true 且 RiskControl=true 时将自动无视群聊功能，建议设置为 false）
 		},
-		lasWeek: week - 1,
+		lasQuater: -1,
 	}
 	controller.PluginRegister(p)
 }
@@ -244,11 +269,13 @@ func scheduleAddPrivate(id int64, dateStr string, title string, description stri
 		return
 	}
 	object := param.Schedule{
-		ScheduleId:  strconv.FormatInt(cnt, 10),
-		Date:        date,
-		Title:       title,
-		Description: description,
-		ExistFlag:   true,
+		ScheduleId:   strconv.FormatInt(cnt, 10),
+		Date:         date,
+		Title:        title,
+		Description:  description,
+		ExistFlag:    true,
+		Alarm1hFlag:  false,
+		Alarm24hFlag: false,
 	}
 
 	if err = m.AddSchedule(object); err != nil {
@@ -258,7 +285,7 @@ func scheduleAddPrivate(id int64, dateStr string, title string, description stri
 	}
 
 	util.QQSend(id, constant.CarrotScheduleAddSuccess)
-	util.QQGroupSend(config.C.Plugin.Schedule.Group, fmt.Sprintf("约定好了，要和卡洛在「%s」一起「%s」哦！", object.Date.Format(timePatternSimple), title))
+	util.QQGroupSend(config.C.Plugin.Schedule.Group, fmt.Sprintf("约定好了，要和卡洛在「%s」一起「%s」哦！", object.Date.Local().Format(timePatternSimple), title))
 }
 
 func scheduleUpdatePrivate(id int64, ScheduleId string, dateStr string, title string, description string) {
@@ -272,10 +299,12 @@ func scheduleUpdatePrivate(id int64, ScheduleId string, dateStr string, title st
 		return
 	}
 	object := param.Schedule{
-		Date:        date,
-		Title:       title,
-		Description: description,
-		ExistFlag:   true,
+		Date:         date,
+		Title:        title,
+		Description:  description,
+		ExistFlag:    true,
+		Alarm1hFlag:  false,
+		Alarm24hFlag: false,
 	}
 
 	updatedObject, err := m.UpdateScheduleById(ScheduleId, object)
@@ -308,7 +337,9 @@ func getScheduleStringAllFromNow() string {
 
 	message := constant.CarrotScheduleShowSuccess
 	for _, object := range schedules {
-		message = fmt.Sprintf("%s\n[%s] %s %s", message, object.ScheduleId, object.Date.Format(timePatternSimple), object.Title)
+		duration := time.Now().Sub(object.Date.Local()).Hours() / 24
+		message = fmt.Sprintf("%s\n[%s] %s %s %.0fd",
+			message, object.ScheduleId, object.Date.Local().Format(timePatternSimple), object.Title, duration)
 	} // [asd]1/2/Mon/数据结构考试
 
 	return message
@@ -333,7 +364,9 @@ func getScheduleStringByTitleFromNow(title string, page int64, limit int64) stri
 
 	message := constant.CarrotScheduleShowSuccess
 	for _, object := range schedules {
-		message = fmt.Sprintf("%s\n[%s] %s %s", message, object.ScheduleId, object.Date.Format(timePatternSimple), object.Title)
+		duration := time.Now().Sub(object.Date.Local()).Hours() / 24
+		message = fmt.Sprintf("%s\n[%s] %s %s %.0fd",
+			message, object.ScheduleId, object.Date.Local().Format(timePatternSimple), object.Title, duration)
 	} // [asd]1/2/Mon/数据结构考试
 
 	return message
@@ -352,8 +385,47 @@ func getScheduleDetailStringById(id string) string {
 		return constant.CarrotScheduleShowFailed
 	}
 
-	message := fmt.Sprintf("【第 %s 号约定】\n时间：%s\n事件：%s\n备注：%s",
-		object.ScheduleId, object.Date.Format(timePatternComplex), object.Title, object.Description)
+	duration := time.Now().Sub(object.Date.Local())
+	message := fmt.Sprintf("【第 %s 号约定】\n时间：%s\n剩余：%.1fh, %.0fd\n事件：%s\n备注：%s",
+		object.ScheduleId, object.Date.Local().Format(timePatternComplex), duration.Hours(), duration.Hours()/24, object.Title, object.Description)
+
+	return message
+}
+
+func getScheduleStringRecent() string {
+	m := model.GetModel()
+	defer m.Close()
+
+	schedules, err := m.GetScheduleAllFromNow()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return constant.CarrotScheduleNotFound
+		}
+		util.ErrorPrint(err, nil, "mongo")
+		return constant.CarrotScheduleShowFailed
+	}
+
+	if len(schedules) == 0 {
+		return constant.CarrotScheduleShowEmpty
+	}
+
+	message := "哇！距离约定"
+	flag := 0
+	for _, object := range schedules {
+		duration := time.Now().Sub(object.Date.Local()).Hours()
+		if math.Abs(duration) < 24 && object.Alarm24hFlag == false && flag != 1 {
+			message = fmt.Sprintf("%s「%s」", message, object.Title)
+			object.Alarm24hFlag = true
+			_, _ = m.UpdateScheduleById(object.ScheduleId, object)
+			flag = 24
+		} else if math.Abs(duration) < 1 && object.Alarm1hFlag == false && flag != 24 {
+			message = fmt.Sprintf("%s「%s」", message, object.Title)
+			object.Alarm1hFlag = true
+			_, _ = m.UpdateScheduleById(object.ScheduleId, object)
+			flag = 1
+		}
+	}
+	message = fmt.Sprintf("%s只有不到 %d 小时了！卡洛好期待~", message, flag)
 
 	return message
 }
