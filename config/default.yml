@@ -10,11 +10,11 @@ mongodb:
 qqbot:
   name: "middleware" # 修改为你的 QQ bot 账号名(匹配 @ 时使用)
   host: "http://127.0.0.1:5701"
-  qq: 927207059 # 修改为你的 QQ bot 账号
+  qq: 2379103773 # 修改为你的 QQ bot 账号
 
 plugin:
   default:
-    admin: 2039799616 # 修改为你的 QQ 账号
+    admin: 1353055672 # 修改为你的 QQ 账号
   weather:
     host: "https://api.seniverse.com/v3/weather/daily.json"
     token: "SRw2t5tNFjmvTEkF2"

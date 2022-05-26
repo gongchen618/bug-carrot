@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/togatoga/goforces"
@@ -58,7 +59,7 @@ func (p *codeforces) IsMatchedGroup(msg param.GroupMessage) bool {
 
 func (p *codeforces) DoMatchedGroup(msg param.GroupMessage) error {
 	if !config.C.RiskControl {
-		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getCodeforcesContestList())
+		util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), getCodeforcesContestList(msg.RawMessage))
 	} else {
 		util.QQSend(config.C.Plugin.Default.Admin, constant.CarrotRiskControlAngry)
 	}
@@ -74,7 +75,7 @@ func (p *codeforces) DoMatchedPrivate(msg param.PrivateMessage) error {
 		if config.C.RiskControl {
 			util.QQSend(msg.UserId, constant.CarrotRiskControlAngry)
 		} else {
-			util.QQSend(msg.UserId, getCodeforcesContestList())
+			util.QQSend(msg.UserId, getCodeforcesContestList(msg.RawMessage))
 		}
 	}
 	return nil
@@ -102,7 +103,7 @@ func CodeforcesPluginRegister() {
 	controller.PluginRegister(p)
 }
 
-func getCodeforcesContestList() string {
+func getCodeforcesContestList(msg string) string {
 	// { DurationSeconds: 7200 Frozen: false ID: 1681 Name:Educational Codeforces Round 129 (Rated for Div. 2) Phase:BEFORE RelativeTimeSeconds: -1046232 StartTimeSeconds: 1653316500 Type:ICPC }
 	ctx := context.Background()
 	logger := log.New(os.Stderr, "[Goforces] ", log.LstdFlags)
@@ -124,11 +125,48 @@ func getCodeforcesContestList() string {
 			tot++
 			dur, _ := time.ParseDuration(fmt.Sprintf("%ds", contestList[i].DurationSeconds))
 			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05") // Do not change this time
-			text += fmt.Sprintf("\n\n%d. %v\n%v, Duration: %v\n%v", tot, contestList[i].Name, st, dur, contestList[i].ContestURL())
+			text += fmt.Sprintf("\n%d. %v, %v, %v", tot, parseCodeforcesContestName(contestList[i].Name), st, dur)
 		}
 	}
 	if tot == 0 {
 		text += "\nNone"
 	}
 	return text
+}
+func parseCodeforcesContestName(contest string) string {
+	ans := contest[strings.Index(contest, "("):]
+	num := 0
+	ind := 0
+	len := len(contest)
+	if strings.Contains(contest, "Educational") {
+		ans = "Edu "
+		ind = strings.Index(contest, "Round")
+		if ind != -1 {
+			ind += 6
+			for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
+				num = num*10 + (int)(contest[ind]) - '0'
+				ind++
+			}
+			ans += fmt.Sprintf("#%d ", num)
+		}
+	} else if ind = strings.Index(contest, "#"); ind != -1 {
+		ind++
+		for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
+			num = num*10 + (int)(contest[ind]) - '0'
+			ind++
+		}
+		ans = fmt.Sprintf("#%d ", num)
+	}
+	if strings.Contains(contest, "Div. 1 + Div. 2") {
+		ans += "(Div. 1 + Div. 2)"
+	} else if ind = strings.Index(contest, "Div. "); ind != -1 {
+		ind += 5
+		num = 0
+		for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
+			num = num*10 + (int)(contest[ind]) - '0'
+			ind++
+		}
+		ans += fmt.Sprintf("(Div. %d)", num)
+	}
+	return ans
 }
