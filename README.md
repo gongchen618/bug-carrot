@@ -47,7 +47,7 @@
 - 在 `/model` 目录下仿照 `homework.go` 和 `food.go` 的结构写你需要的逻辑，再于同目录下 `init.go` 的 `Model{}` 中增加你的 Interface
 
 **Q4: 我应该如何在本地测试我的 plugin?**
-- pull 这个 repo，按照上面的指引写好 plugin，修改 `../../config/default.yml` 中 qqbot-qq 为你自己的 QQ 号，然后在本地跑起来!
+- pull 这个 repo，按照上面的指引写好 plugin，复制 `../../config/default-example.yml` 并重命名为 `default.yml` ，修改 `default.yml` 中 qqbot-qq 为你自己的 QQ 号，然后在本地跑起来!
 - 在 https://docs.go-cqhttp.org/ 安装 cqhttp，修改 config.yml 的 uin 为自己的 QQ 号，修改 http 通信设置为
 ```yml
   - http:

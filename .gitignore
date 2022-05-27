@@ -7,4 +7,4 @@ build
 
 pkg
 
-config/user.yml
+config/default.yml
