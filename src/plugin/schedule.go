@@ -80,6 +80,10 @@ func (p *schedule) IsTime() bool {
 }
 
 func (p *schedule) DoTime() error {
+	if time.Now().Weekday() == time.Monday {
+		util.QQSend(config.C.Plugin.Schedule.Group, getScheduleStringAllFromNow())
+		return nil
+	}
 	util.QQGroupSend(config.C.Plugin.Schedule.Group, getScheduleStringRecent())
 	return nil
 }
