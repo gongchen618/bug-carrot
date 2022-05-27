@@ -120,53 +120,92 @@ func getCodeforcesContestList(msg string) string {
 	ListLen := len(contestList)
 	text := "Codeforces Upcoming Contests:"
 	tot := 0
+	QueryLen := -1
+	if ind := strings.Index(msg, "-l"); ind != -1 {
+		QueryLen = getNumber(msg, ind+2)
+		if QueryLen > 100 {
+			text = "Query list is too long.\n\n"
+			QueryLen = 100
+		} else {
+			text = ""
+		}
+		text += fmt.Sprintf("Codeforces Recent %d Contests:", QueryLen)
+	}
 	for i := ListLen - 1; i >= 0; i-- {
-		if contestList[i].Before() {
+		if (contestList[i].Before() && QueryLen < 0) || (QueryLen > 0 && i+1 <= QueryLen) {
 			tot++
-			dur, _ := time.ParseDuration(fmt.Sprintf("%ds", contestList[i].DurationSeconds))
-			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05") // Do not change this time
+			dur := ParseTime(contestList[i].DurationSeconds)
+			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05")[2:16] // Do not change this time
 			text += fmt.Sprintf("\n%d. %v, %v, %v", tot, parseCodeforcesContestName(contestList[i].Name), st, dur)
 		}
 	}
 	if tot == 0 {
 		text += "\nNone"
 	}
+	fmt.Println(text)
 	return text
 }
 func parseCodeforcesContestName(contest string) string {
-	ans := contest[strings.Index(contest, "("):]
-	num := 0
 	ind := 0
-	len := len(contest)
+	ans := ""
+	if ind = strings.Index(contest, "("); ind != -1 {
+		ans = contest[:ind]
+	} else {
+		ans = contest
+	}
 	if strings.Contains(contest, "Educational") {
 		ans = "Edu "
 		ind = strings.Index(contest, "Round")
 		if ind != -1 {
-			ind += 6
-			for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
-				num = num*10 + (int)(contest[ind]) - '0'
-				ind++
-			}
-			ans += fmt.Sprintf("#%d ", num)
+			ans += fmt.Sprintf("#%d ", getNumber(contest, ind+6))
 		}
 	} else if ind = strings.Index(contest, "#"); ind != -1 {
-		ind++
-		for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
-			num = num*10 + (int)(contest[ind]) - '0'
-			ind++
-		}
-		ans = fmt.Sprintf("#%d ", num)
+		ans = fmt.Sprintf("#%d ", getNumber(contest, ind+1))
 	}
 	if strings.Contains(contest, "Div. 1 + Div. 2") {
 		ans += "(Div. 1 + Div. 2)"
 	} else if ind = strings.Index(contest, "Div. "); ind != -1 {
-		ind += 5
-		num = 0
-		for ind < len && contest[ind] >= '0' && contest[ind] <= '9' {
-			num = num*10 + (int)(contest[ind]) - '0'
-			ind++
-		}
-		ans += fmt.Sprintf("(Div. %d)", num)
+		ans += fmt.Sprintf("(Div. %d)", getNumber(contest, ind+5))
+	}
+	return ans
+}
+
+func getNumber(s string, st int) int {
+	ans := 0
+	len := len(s)
+	for st < len && (s[st] < '0' || s[st] > '9') {
+		st++
+	}
+	for st < len && (s[st] >= '0' && s[st] <= '9') {
+		ans = ans*10 + int(s[st]) - '0'
+		st++
+	}
+	return ans
+}
+
+func ParseTime(second int64) string {
+	if second <= 0 {
+		return "0s"
+	}
+	ans := ""
+	d := second / (60 * 60 * 24)
+	second -= d * 60 * 60 * 24
+	h := second / (60 * 60)
+	second -= h * 60 * 60
+	m := second / 60
+	second -= m * 60
+	s := second
+	if d > 0 {
+		ans += fmt.Sprintf("%dd", d)
+	}
+	if h > 0 {
+		ans += fmt.Sprintf("%dh", h)
+	}
+	if m > 0 {
+		ans += fmt.Sprintf("%dmin", m)
+	}
+	if s > 0 {
+		ans += fmt.Sprintf("%ds", s)
 	}
 	return ans
 }
