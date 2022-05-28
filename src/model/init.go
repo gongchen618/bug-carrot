@@ -11,6 +11,7 @@ type Model interface {
 	HomeworkInterface
 	FoodInterface
 	ScheduleInterface
+	KeyWordInterface
 }
 
 type model struct {

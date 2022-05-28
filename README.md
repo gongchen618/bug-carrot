@@ -10,6 +10,7 @@
 - [x] weather 天气
 - [x] codeforces 未来比赛列表
 - [x] schedule 任务清单
+- [x] keyword 召唤(关键字)
 
 ## Q&A
 
