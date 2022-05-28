@@ -1,8 +1,6 @@
 package util
 
 import (
-	"bug-carrot/config"
-	"fmt"
 	"testing"
 )
 
@@ -11,7 +9,7 @@ func TestQQSend(t *testing.T) {
 }
 
 func TestEmoji(t *testing.T) {
-	for i := 0; i <= 222; i++ {
-		QQGroupSend(config.C.Plugin.Homework.Group, fmt.Sprintf("%d[CQ:face,id=%d]", i, i))
-	}
+	//for i := 301; i <= 400; i++ {
+	//	QQGroupSend(config.C.Plugin.Homework.Group, fmt.Sprintf("%d[CQ:face,id=%d]", i, i))
+	//}
 }

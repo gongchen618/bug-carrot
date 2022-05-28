@@ -176,7 +176,7 @@ func HomeworkPluginRegister() {
 			FlagUseDatabase:       true,
 			FlagIgnoreRiskControl: false,
 		},
-		LasWeekday: time.Wednesday,
+		LasWeekday: time.Now().Weekday(),
 	}
 	controller.PluginRegister(p)
 }
