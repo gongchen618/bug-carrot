@@ -128,6 +128,7 @@ var emojiInvalid map[int64]bool
 
 // packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
+	return message
 	emoji, err := rand.Int(rand.Reader, big.NewInt(222))
 	if err != nil {
 		emoji = big.NewInt(0) // [惊讶]
@@ -149,6 +150,11 @@ func markInvalidEmoji() {
 		70, 71, 72, 73,
 		80, 82, 83, 84, 87, 88,
 		90, 91, 92, 93, 94, 95,
+		139,
+		141, 142, 143, 149,
+		150, 152, 153, 154, 155, 156, 157, 159,
+		160, 161, 162, 163, 164, 165, 166, 167,
+		170,
 	}
 	for _, e := range invalid {
 		emojiInvalid[e] = true

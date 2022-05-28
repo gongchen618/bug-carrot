@@ -11,9 +11,7 @@ func TestQQSend(t *testing.T) {
 }
 
 func TestEmoji(t *testing.T) {
-	message := ""
 	for i := 0; i <= 222; i++ {
-		message = fmt.Sprintf("%s[CQ:face,id=%d]", message, i)
+		QQGroupSend(config.C.Plugin.Homework.Group, fmt.Sprintf("%d[CQ:face,id=%d]", i, i))
 	}
-	QQGroupSend(config.C.Plugin.Schedule.Group, message)
 }
