@@ -17,6 +17,7 @@ type goodNight struct {
 	UserMessageCount     map[int64]int
 	LastGoodNightDay     int
 	TimeDividingLine     int
+	LastAutoGoodNightDay int
 }
 
 func (p *goodNight) GetPluginName() string {
@@ -45,9 +46,14 @@ func (p *goodNight) DoIgnoreRiskControl() bool {
 }
 
 func (p *goodNight) IsTime() bool {
+	if time.Now().Hour() == 0 && time.Now().Day() != p.LastAutoGoodNightDay {
+		p.LastAutoGoodNightDay = time.Now().Day()
+		return true
+	}
 	return false
 }
 func (p *goodNight) DoTime() error {
+	util.QQGroupSend(config.C.Plugin.Schedule.Group, "睡觉时间到啦！大家晚安哦~")
 	return nil
 }
 
@@ -186,6 +192,7 @@ func GoodNightPluginRegister() {
 		UserMessageCount:     make(map[int64]int),
 		LastGoodNightDay:     time.Now().Day() - 1,
 		TimeDividingLine:     6,
+		LastAutoGoodNightDay: time.Now().Day() - 1,
 	}
 	controller.PluginRegister(p)
 }

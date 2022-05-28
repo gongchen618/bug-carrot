@@ -98,7 +98,6 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 
 		return nil
 	}
-	fmt.Println(topic)
 
 	rd, err := rand.Int(rand.Reader, big.NewInt(101))
 	if err != nil {

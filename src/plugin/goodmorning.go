@@ -10,10 +10,11 @@ import (
 )
 
 type goodMorning struct {
-	Index       param.PluginIndex
-	PassHour    map[int]bool
-	UserDay     map[int64]int
-	LastUserDay int
+	Index                  param.PluginIndex
+	PassHour               map[int]bool
+	UserDay                map[int64]int
+	LastUserDay            int
+	LastAutoGoodMorningDay int
 }
 
 func (p *goodMorning) GetPluginName() string {
@@ -42,9 +43,14 @@ func (p *goodMorning) DoIgnoreRiskControl() bool {
 }
 
 func (p *goodMorning) IsTime() bool {
+	if time.Now().Hour() == 7 && time.Now().Day() != p.LastAutoGoodMorningDay {
+		p.LastAutoGoodMorningDay = time.Now().Day()
+		return true
+	}
 	return false
 }
 func (p *goodMorning) DoTime() error {
+	util.QQGroupSend(config.C.Plugin.Schedule.Group, "卡洛起床啦！大家早安！")
 	return nil
 }
 
@@ -129,16 +135,17 @@ func GoodMorningPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "goodMorning",
 			PluginAuthor:          "gongchen618",
-			FlagCanTime:           false,
+			FlagCanTime:           true,
 			FlagCanMatchedGroup:   true,
 			FlagCanMatchedPrivate: false,
 			FlagCanListen:         false,
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
 		},
-		PassHour:    passHour,
-		UserDay:     make(map[int64]int),
-		LastUserDay: time.Now().Day() - 1,
+		PassHour:               passHour,
+		UserDay:                make(map[int64]int),
+		LastUserDay:            time.Now().Day() - 1,
+		LastAutoGoodMorningDay: time.Now().Day() - 1,
 	}
 	controller.PluginRegister(p)
 }
