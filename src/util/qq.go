@@ -128,7 +128,6 @@ var emojiInvalid map[int64]bool
 
 // packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
-	return message
 	emoji, err := rand.Int(rand.Reader, big.NewInt(222))
 	if err != nil {
 		emoji = big.NewInt(0) // [惊讶]
