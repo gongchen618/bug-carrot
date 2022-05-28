@@ -18,10 +18,10 @@ func (m *model) homeworkCollection() *mongo.Collection {
 
 type HomeworkInterface interface {
 	AddHomework(homework param.Homework) error
-	DeleteHomework(homework param.Homework) error
+	DeleteHomework(subject string, context string) error
 	ClearAllHomework() error
-	GetHomeworkByTimeRange(timeL time.Time, timeR time.Time) ([]param.Homework, error)
-	//GetHomeworkBySubject(context string) ([]param.Homework, error)
+	GetHomeworkFromNow() ([]param.Homework, error)
+	GetHomeWorkByWeekDay(weekday time.Weekday) ([]param.Homework, error)
 }
 
 func (m *model) AddHomework(homework param.Homework) error {
@@ -44,15 +44,8 @@ func (m *model) AddHomework(homework param.Homework) error {
 	return nil
 }
 
-func (m *model) DeleteHomework(homework param.Homework) error {
-	//filter := bson.M{"subject": homework.Subject, "context": homework.Context}
-	//update := bson.M{"$set": homework}
-	//_, err := m.homeworkCollection().UpdateOne(m.context, filter, update)
-	//if err != nil {
-	//	return err
-	//}
-
-	filter := bson.M{"subject": homework.Subject, "context": homework.Context}
+func (m *model) DeleteHomework(subject string, context string) error {
+	filter := bson.M{"subject": subject, "context": context}
 	res, err := m.homeworkCollection().DeleteOne(m.context, filter)
 	if err != nil {
 		return err
@@ -77,11 +70,22 @@ func (m *model) ClearAllHomework() error {
 	return nil
 }
 
-func (m *model) GetHomeworkByTimeRange(timeL time.Time, timeR time.Time) ([]param.Homework, error) {
-	filter := bson.M{"create_time": bson.M{
-		"$gt": timeL,
-		"$lt": timeR,
-	}}
+func (m *model) GetHomeworkFromNow() ([]param.Homework, error) {
+	cursor, err := m.homeworkCollection().Find(m.context, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	var homeworks []param.Homework
+	if err = cursor.All(m.context, &homeworks); err != nil {
+		return nil, err
+	}
+
+	return homeworks, nil
+}
+
+func (m *model) GetHomeWorkByWeekDay(weekday time.Weekday) ([]param.Homework, error) {
+	filter := bson.M{"weekday": weekday}
 
 	cursor, err := m.homeworkCollection().Find(m.context, filter)
 	if err != nil {

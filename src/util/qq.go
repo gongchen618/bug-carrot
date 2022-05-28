@@ -84,7 +84,7 @@ func QQGroupSendAtSomeone(groupId int64, userId int64, message string) {
 
 	q := req.URL.Query()
 	q.Add("group_id", strconv.FormatInt(groupId, 10))
-	q.Add("message", fmt.Sprintf("[CQ:at,qq=%d] %s", userId, packageMessage(message)))
+	q.Add("message", fmt.Sprintf("[CQ:at,qq=%d]%s", userId, packageMessage(message)))
 	req.URL.RawQuery = q.Encode()
 
 	client := &http.Client{}
