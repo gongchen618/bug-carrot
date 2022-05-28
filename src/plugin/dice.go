@@ -67,7 +67,10 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 		str := strings.Split(topic, p.DividingString)
 		topic = str[0]
 		limit, err = strconv.ParseInt(str[1], 10, 64)
-		if err == nil && limit > 0 {
+		if err != nil || limit <= 0 {
+			util.QQGroupSendAtSomeone(msg.GroupId, util.GetQQGroupUserId(msg), "好奇怪的要求...")
+			return nil
+		} else {
 			limitTag = true
 		}
 	} // 占卜topic#number
@@ -90,11 +93,12 @@ func (p *dice) DoMatchedGroup(msg param.GroupMessage) error {
 			rd = big.NewInt(0)
 		}
 		star := rd.Int64() + 1 // 下界从 1 开始
-		diceResultMessage := fmt.Sprintf("#卡洛对 %d 颗星星使用了占卜术，发现与事件「%s」最契合的是小行星 %d 号...这意味着什么呢？", limit, topic, star)
+		diceResultMessage := fmt.Sprintf("#卡洛透过水晶球向 %d 颗星星望去，发现与事件「%s」最契合的是小行星 %d 号...这意味着什么呢？", limit, topic, star)
 		util.QQGroupSend(msg.GroupId, diceResultMessage)
 
 		return nil
 	}
+	fmt.Println(topic)
 
 	rd, err := rand.Int(rand.Reader, big.NewInt(101))
 	if err != nil {
