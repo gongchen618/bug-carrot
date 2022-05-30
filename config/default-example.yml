@@ -28,6 +28,9 @@ plugin:
   schedule:
     admin: 1000000000 # 修改为你的 QQ 账号
     group: 1000000000 # 修改为你的测试群聊
+  codeforces:
+    admin: 1000000000 # 修改为你的 QQ 账号
+    group: 1000000000 # 修改为你的测试群聊
 
 risk-control: false # 当前风控，群聊功能关闭
 database-use: true # 测试环境没有运行 mongo 数据库

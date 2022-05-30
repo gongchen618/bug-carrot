@@ -30,16 +30,16 @@ func main() {
 // 新插件需要在这里调用 Register 函数
 // 注意顺序
 func pluginRegister() {
-	plugin.HomeworkPluginRegister() // 作业
-	plugin.SchedulePluginRegister() // 任务清单
-	plugin.FoodPluginRegister()     // 吃什么
-	plugin.WeatherPluginRegister()  // 天气
-	plugin.DicePluginRegister()     // 骰子
+	plugin.HomeworkPluginRegister()   // 作业
+	plugin.SchedulePluginRegister()   // 任务清单
+	plugin.CodeforcesPluginRegister() // CF
+	plugin.FoodPluginRegister()       // 吃什么
+	plugin.WeatherPluginRegister()    // 天气
+	plugin.DicePluginRegister()       // 骰子
 
 	plugin.GoodMorningPluginRegister() // 早安
 	plugin.GoodNightPluginRegister()   // 晚安
 	plugin.RepeatPluginRegister()      // 重复
-	plugin.CodeforcesPluginRegister()  // CF
 
 	plugin.DefaultPluginRegister() // 默认回复
 }

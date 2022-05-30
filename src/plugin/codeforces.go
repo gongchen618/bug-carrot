@@ -17,7 +17,8 @@ import (
 )
 
 type codeforces struct {
-	Index param.PluginIndex
+	Index          param.PluginIndex
+	noticedContest [10020]int
 }
 
 func (p *codeforces) GetPluginName() string {
@@ -46,10 +47,37 @@ func (p *codeforces) DoIgnoreRiskControl() bool {
 }
 
 func (p *codeforces) IsTime() bool {
-	return false
+	return time.Now().Minute()%5 == 0
 }
 
 func (p *codeforces) DoTime() error {
+	ctx := context.Background()
+	logger := log.New(os.Stderr, "[Goforces] ", log.LstdFlags)
+	api, err := goforces.NewClient(logger)
+	if err != nil {
+		util.ErrorPrint(err, nil, "[Goforces] Failed to initial goforces.")
+		return err
+	}
+	contestList, err := api.GetContestList(ctx, nil)
+	if err != nil {
+		util.ErrorPrint(err, nil, "[Goforces] Failed to get contests list.")
+		return err
+	}
+	ListLen := len(contestList)
+	for i := ListLen - 1; i >= 0; i-- {
+		fmt.Println(i, contestList[i].Before(), contestList[i].RelativeTimeSeconds)
+		if contestList[i].Before() && -contestList[i].RelativeTimeSeconds <= 60*60*2 {
+			if -contestList[i].RelativeTimeSeconds <= 60*10 {
+				if p.noticedContest[i] < 2 {
+					p.noticedContest[i] = 2
+					util.QQGroupSend(config.C.Plugin.Codeforces.Group, fmt.Sprintf("%v will start in 10 minutes.\n%v", contestList[i].Name, contestList[i].ContestURL()))
+				}
+			} else if p.noticedContest[i] < 1 {
+				p.noticedContest[i] = 1
+				util.QQGroupSend(config.C.Plugin.Codeforces.Group, fmt.Sprintf("%v will start in 2 hours. Don't forget to register!\n%v", contestList[i].Name, contestList[i].ContestURL()))
+			}
+		}
+	}
 	return nil
 }
 
@@ -92,7 +120,7 @@ func CodeforcesPluginRegister() {
 		Index: param.PluginIndex{
 			PluginName:            "codeforces",
 			PluginAuthor:          "ligen131",
-			FlagCanTime:           false,
+			FlagCanTime:           true,
 			FlagCanMatchedGroup:   true,
 			FlagCanMatchedPrivate: true,
 			FlagCanListen:         false,
@@ -134,15 +162,14 @@ func getCodeforcesContestList(msg string) string {
 	for i := ListLen - 1; i >= 0; i-- {
 		if (contestList[i].Before() && QueryLen < 0) || (QueryLen > 0 && i+1 <= QueryLen) {
 			tot++
-			dur := ParseTime(contestList[i].DurationSeconds)
+			dur := ParseTime(contestList[i].DurationSeconds, true, true, true, false)
 			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05")[2:16] // Do not change this time
-			text += fmt.Sprintf("\n%d. %v, %v, %v", tot, parseCodeforcesContestName(contestList[i].Name), st, dur)
+			text += fmt.Sprintf("\n%d. %v, %v, %v - %v", tot, parseCodeforcesContestName(contestList[i].Name), st, dur, ParseTime(-contestList[i].RelativeTimeSeconds, true, true, true, false))
 		}
 	}
 	if tot == 0 {
 		text += "\nNone"
 	}
-	fmt.Println(text)
 	return text
 }
 func parseCodeforcesContestName(contest string) string {
@@ -183,7 +210,7 @@ func getNumber(s string, st int) int {
 	return ans
 }
 
-func ParseTime(second int64) string {
+func ParseTime(second int64, dNeed bool, hNeed bool, mNeed bool, sNeed bool) string {
 	if second <= 0 {
 		return "0s"
 	}
@@ -195,16 +222,16 @@ func ParseTime(second int64) string {
 	m := second / 60
 	second -= m * 60
 	s := second
-	if d > 0 {
+	if d > 0 && dNeed {
 		ans += fmt.Sprintf("%dd", d)
 	}
-	if h > 0 {
+	if h > 0 && hNeed {
 		ans += fmt.Sprintf("%dh", h)
 	}
-	if m > 0 {
+	if m > 0 && mNeed {
 		ans += fmt.Sprintf("%dmin", m)
 	}
-	if s > 0 {
+	if s > 0 && sNeed {
 		ans += fmt.Sprintf("%ds", s)
 	}
 	return ans
