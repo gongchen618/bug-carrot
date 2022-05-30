@@ -1,36 +1,38 @@
-# 本文件为本地测试配置
-# 配置方法：复制本文件并重命名为 `default.yml`，修改 `default.yml` 中的内容
-app:
+# 本文件为本地测试配置样例
+# 一般来说，本文件不应该被修改，除非你需要调整配置文件结构
+# 正确的做法是在当前文件夹创建一个本文件的副本，并命名为 default.yml，然后修改其为你需要的本地配置
+
+app: # 与 bot 的通信配置，无需修改
   addr: ":3456"
   prefix: "/api"
-mongodb:
+mongodb: # 数据库配置，当 database-use 设置为 false 时无需关注
   host: "127.0.0.1"
   username: "carrot"
   password: "123"
   database: "carrot"
-qqbot:
-  name: "middleware" # 修改为你的 QQ bot 账号名(匹配 @ 时使用)
+qqbot: # QQBot 配置
+  name: "middleware" # 修改为你的 QQBot 账号名(匹配 @ 前缀时使用)
   host: "http://127.0.0.1:5701"
-  qq: 1000000000 # 修改为你的 QQ bot 账号
+  qq: 321000000 # 修改为你的 QQ bot 账号
 
-plugin:
+plugin: # 插件配置
   default:
-    admin: 1000000000 # 修改为你的 QQ 账号
-  weather:
+    admin: 100000000 # 修改为你的 QQ 账号
+  weather: # 天气 API 配置
     host: "https://api.seniverse.com/v3/weather/daily.json"
     token: "SRw2t5tNFjmvTEkF2"
   homework:
-    admin: 1000000000 # 修改为你的 QQ 账号
-    group: 1000000000 # 修改为你的测试群聊
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 2222222 # 修改为你的测试群聊
   food:
-    admin: 1000000000 # 修改为你的 QQ 账号
-    group: 1000000000 # 修改为你的测试群聊
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 2222222 # 修改为你的测试群聊
   schedule:
-    admin: 1000000000 # 修改为你的 QQ 账号
-    group: 1000000000 # 修改为你的测试群聊
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 2222222 # 修改为你的测试群聊
   codeforces:
-    admin: 1000000000 # 修改为你的 QQ 账号
-    group: 1000000000 # 修改为你的测试群聊
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 2222222 # 修改为你的测试群聊
 
 risk-control: false # 当前风控，群聊功能关闭
-database-use: true # 测试环境没有运行 mongo 数据库
+database-use: true # 标注运行环境是否配置 mongo 数据库，如设置 false，所有涉及到数据库的插件都不会运行

@@ -36,6 +36,7 @@ func pluginRegister() {
 	plugin.FoodPluginRegister()       // 吃什么
 	plugin.WeatherPluginRegister()    // 天气
 	plugin.DicePluginRegister()       // 骰子
+	plugin.KeyWordPluginRegister()    // 关键词
 
 	plugin.GoodMorningPluginRegister() // 早安
 	plugin.GoodNightPluginRegister()   // 晚安
