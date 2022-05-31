@@ -30,6 +30,7 @@ func main() {
 // 新插件需要在这里调用 Register 函数
 // 注意顺序
 func pluginRegister() {
+
 	plugin.HomeworkPluginRegister()   // 作业
 	plugin.SchedulePluginRegister()   // 任务清单
 	plugin.CodeforcesPluginRegister() // CF

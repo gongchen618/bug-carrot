@@ -84,7 +84,7 @@ func QQGroupSendAtSomeone(groupId int64, userId int64, message string) {
 
 	q := req.URL.Query()
 	q.Add("group_id", strconv.FormatInt(groupId, 10))
-	q.Add("message", fmt.Sprintf("[CQ:at,qq=%d] %s", userId, packageMessage(message)))
+	q.Add("message", fmt.Sprintf("[CQ:at,qq=%d]%s", userId, packageMessage(message)))
 	req.URL.RawQuery = q.Encode()
 
 	client := &http.Client{}
@@ -128,7 +128,7 @@ var emojiInvalid map[int64]bool
 
 // packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
-	emoji, err := rand.Int(rand.Reader, big.NewInt(222))
+	emoji, err := rand.Int(rand.Reader, big.NewInt(332))
 	if err != nil {
 		emoji = big.NewInt(0) // [惊讶]
 	} else {
@@ -149,6 +149,12 @@ func markInvalidEmoji() {
 		70, 71, 72, 73,
 		80, 82, 83, 84, 87, 88,
 		90, 91, 92, 93, 94, 95,
+		139,
+		141, 142, 143, 149,
+		150, 152, 153, 154, 155, 156, 157, 159,
+		160, 161, 162, 163, 164, 165, 166, 167,
+		170,
+		251, 252, 253, 254, 255,
 	}
 	for _, e := range invalid {
 		emojiInvalid[e] = true

@@ -9,6 +9,8 @@
 - [x] repeat 复读
 - [x] weather 天气
 - [x] codeforces 未来比赛列表
+- [x] schedule 任务清单
+- [x] keyword 召唤(关键字)
 
 ## Q&A
 
@@ -37,7 +39,7 @@
 **Q2: 我可以通过哪些方法把我的 plugin 写的更加...格式化？**
 - 把 bot 的语言部分统一写在 `/constant/index.go` 里
 - 把某些配置写在 `../../config/default.yml` 里，并对应修改 `config/config.go` 中 `Plugin{}` 的结构，让它可以被你的插件读取
-- 对于上一个选择，记得相应的去更新 `prod.yml`
+- 对于上一个选择，记得相应的去更新 `prod.yml` 和 `default-example.yml`
 - 把新增的结构体写到 `/param` 目录里
 
 **Q3: 我需要调用数据库？**
