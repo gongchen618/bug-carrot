@@ -41,11 +41,12 @@ type qqbot struct {
 }
 
 type plugin struct {
-	Default  _default `yaml:"default"`
-	Weather  weather  `yaml:"weather"`
-	Homework homework `yaml:"homework"`
-	Food     food     `yaml:"food"`
-	Schedule schedule `yaml:"schedule"`
+	Default    _default   `yaml:"default"`
+	Weather    weather    `yaml:"weather"`
+	Homework   homework   `yaml:"homework"`
+	Food       food       `yaml:"food"`
+	Schedule   schedule   `yaml:"schedule"`
+	Codeforces codeforces `yaml:"codeforces"`
 }
 
 type _default struct {
@@ -68,6 +69,11 @@ type food struct {
 }
 
 type schedule struct {
+	Admin int64 `yaml:"admin"`
+	Group int64 `yaml:"group"`
+}
+
+type codeforces struct {
 	Admin int64 `yaml:"admin"`
 	Group int64 `yaml:"group"`
 }

@@ -30,6 +30,9 @@ plugin: # 插件配置
   schedule:
     admin: 100000000 # 修改为你的 QQ 账号
     group: 2222222 # 修改为你的测试群聊
+  codeforces:
+    admin: 100000000 # 修改为你的 QQ 账号
+    group: 2222222 # 修改为你的测试群聊
 
 risk-control: false # 当前风控，群聊功能关闭
 database-use: true # 标注运行环境是否配置 mongo 数据库，如设置 false，所有涉及到数据库的插件都不会运行
