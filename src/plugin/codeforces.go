@@ -18,6 +18,7 @@ import (
 
 type codeforces struct {
 	Index          param.PluginIndex
+	lastCheck      int
 	noticedContest [10020]int
 }
 
@@ -47,7 +48,14 @@ func (p *codeforces) DoIgnoreRiskControl() bool {
 }
 
 func (p *codeforces) IsTime() bool {
-	return time.Now().Minute()%5 == 0
+	if time.Now().Minute()%5 == 0 {
+		if p.lastCheck == time.Now().Minute()/5 {
+			return false
+		}
+		p.lastCheck = time.Now().Minute() / 5
+		return true
+	}
+	return false
 }
 
 func (p *codeforces) DoTime() error {
@@ -65,7 +73,6 @@ func (p *codeforces) DoTime() error {
 	}
 	ListLen := len(contestList)
 	for i := ListLen - 1; i >= 0; i-- {
-		//fmt.Println(i, contestList[i].Before(), contestList[i].RelativeTimeSeconds)
 		if contestList[i].Before() && -contestList[i].RelativeTimeSeconds <= 60*60*2 {
 			if -contestList[i].RelativeTimeSeconds <= 60*10 {
 				if p.noticedContest[i] < 2 {
@@ -127,6 +134,7 @@ func CodeforcesPluginRegister() {
 			FlagUseDatabase:       false,
 			FlagIgnoreRiskControl: false,
 		},
+		lastCheck: -1,
 	}
 	controller.PluginRegister(p)
 }
