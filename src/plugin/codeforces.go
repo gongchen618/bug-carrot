@@ -65,7 +65,7 @@ func (p *codeforces) DoTime() error {
 	}
 	ListLen := len(contestList)
 	for i := ListLen - 1; i >= 0; i-- {
-		fmt.Println(i, contestList[i].Before(), contestList[i].RelativeTimeSeconds)
+		//fmt.Println(i, contestList[i].Before(), contestList[i].RelativeTimeSeconds)
 		if contestList[i].Before() && -contestList[i].RelativeTimeSeconds <= 60*60*2 {
 			if -contestList[i].RelativeTimeSeconds <= 60*10 {
 				if p.noticedContest[i] < 2 {
