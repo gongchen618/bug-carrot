@@ -163,8 +163,9 @@ func getCodeforcesContestList(msg string) string {
 		if (contestList[i].Before() && QueryLen < 0) || (QueryLen > 0 && i+1 <= QueryLen) {
 			tot++
 			dur := ParseTime(contestList[i].DurationSeconds, true, true, true, false)
-			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01-02 15:04:05")[2:16] // Do not change this time
-			text += fmt.Sprintf("\n%d. %v, %v, %v - %v", tot, parseCodeforcesContestName(contestList[i].Name), st, dur, ParseTime(-contestList[i].RelativeTimeSeconds, true, true, true, false))
+			st := time.Unix(contestList[i].StartTimeSeconds, 0).Format("2006-01/02 15:04:05")[5:16] // Do not change this time
+			text += fmt.Sprintf("\n➢ %v %v(%v) - %v",
+				parseCodeforcesContestName(contestList[i].Name), st, dur, ParseTime(-contestList[i].RelativeTimeSeconds, true, true, true, false))
 		}
 	}
 	if tot == 0 {
@@ -229,7 +230,7 @@ func ParseTime(second int64, dNeed bool, hNeed bool, mNeed bool, sNeed bool) str
 		ans += fmt.Sprintf("%dh", h)
 	}
 	if m > 0 && mNeed {
-		ans += fmt.Sprintf("%dmin", m)
+		ans += fmt.Sprintf("%dm", m)
 	}
 	if s > 0 && sNeed {
 		ans += fmt.Sprintf("%ds", s)
