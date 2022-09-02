@@ -4,11 +4,11 @@ package controller
 // 注意一般情况下不要给 qqbot 返回 error
 
 import (
-	"bug-carrot/config"
-	"bug-carrot/constant"
-	"bug-carrot/param"
-	"bug-carrot/util"
-	"bug-carrot/util/context"
+	"bug-carrot/src/config"
+	"bug-carrot/src/constant"
+	"bug-carrot/src/param"
+	"bug-carrot/src/util"
+	"bug-carrot/src/util/context"
 	"bytes"
 	"encoding/json"
 	"fmt"

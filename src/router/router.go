@@ -1,7 +1,7 @@
 package router
 
 import (
-	"bug-carrot/controller"
+	"bug-carrot/src/controller"
 	"github.com/labstack/echo/v4"
 )
 

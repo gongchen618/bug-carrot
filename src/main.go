@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bug-carrot/config"
-	"bug-carrot/controller"
-	"bug-carrot/plugin"
-	"bug-carrot/router"
+	"bug-carrot/src/config"
+	"bug-carrot/src/controller"
+	"bug-carrot/src/plugin"
+	"bug-carrot/src/router"
 	"fmt"
 	"log"
 	"os"

@@ -1,7 +1,7 @@
 package util
 
 import (
-	"bug-carrot/param"
+	"bug-carrot/src/param"
 	"github.com/yanyiwu/gojieba"
 	"strings"
 	"sync"

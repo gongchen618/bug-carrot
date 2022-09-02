@@ -1,0 +1,4 @@
+plugin-name: "dice"
+
+method:
+  function-name: "DiceGroupMember"

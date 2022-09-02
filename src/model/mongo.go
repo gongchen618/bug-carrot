@@ -1,7 +1,7 @@
 package model
 
 import (
-	"bug-carrot/config"
+	"bug-carrot/src/config"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -1,8 +1,8 @@
 package util
 
 import (
-	"bug-carrot/config"
-	"bug-carrot/param"
+	"bug-carrot/src/config"
+	"bug-carrot/src/param"
 	"bytes"
 	"crypto/rand"
 	"fmt"

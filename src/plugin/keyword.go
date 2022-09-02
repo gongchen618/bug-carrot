@@ -1,11 +1,11 @@
 package plugin
 
 import (
-	"bug-carrot/constant"
-	"bug-carrot/controller"
-	"bug-carrot/model"
-	"bug-carrot/param"
-	"bug-carrot/util"
+	"bug-carrot/src/constant"
+	"bug-carrot/src/controller"
+	"bug-carrot/src/model"
+	"bug-carrot/src/param"
+	"bug-carrot/src/util"
 	"fmt"
 	"strings"
 )
