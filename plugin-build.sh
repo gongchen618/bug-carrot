@@ -1,0 +1,1 @@
+go build -bulidmode=plugin -o plugin-so/plugin-dice.so plugin/dice/dice.go
