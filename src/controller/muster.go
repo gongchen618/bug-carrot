@@ -12,113 +12,136 @@ import (
 	"net/http"
 )
 
-func GetAllFamilyMembersRequestHandler(c echo.Context) error {
+type muster struct {
+	People []param.FamilyMember
+}
+
+func GetAllMusterRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
 	members, err := m.GetAllFamilyMember()
 	if err != nil {
-		util.ErrorPrint(err, nil, "get all family member failed")
+		util.ErrorPrint(err, nil, "get all muster member failed")
 		return context.Error(c, http.StatusInternalServerError, "", err)
 	}
 
 	return context.Success(c, members)
 }
 
-func CreateOneFamilyMemberRequestHandler(c echo.Context) error {
+func CreateOneMusterByNameRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
-	var bodyBytes []byte
-	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
-	c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	p := param.FamilyMember{}
-	if err := json.Unmarshal(bodyBytes, &p); err != nil {
-		util.ErrorPrint(err, nil, "unmarshal failed on creating family member")
-		return context.Error(c, http.StatusBadRequest, "unmarshal failed", err)
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
 	}
 
-	if p.StudentID == "" {
-		util.ErrorPrint(nil, nil, "missing param student_id")
-		return context.Error(c, http.StatusBadRequest, "missing param student_id", nil)
+	title := c.QueryParam("title")
+	if title == "" {
+		return context.Error(c, http.StatusBadRequest, "title cannot be empty", nil)
 	}
 
-	if p.StudentID == "" {
-		util.ErrorPrint(nil, nil, "missing param student_id")
-		return context.Error(c, http.StatusBadRequest, "missing param student_id", nil)
-	}
-	if p.Name == "" {
-		util.ErrorPrint(nil, nil, "missing param name")
-		return context.Error(c, http.StatusBadRequest, "missing param name", nil)
-	}
-	if p.QQ == 0 {
-		util.ErrorPrint(nil, nil, "missing param qq")
-		return context.Error(c, http.StatusBadRequest, "missing param qq", nil)
-	}
-	member, err := m.GetOneFamilyMemberByStudentID(p.StudentID)
-	if err == nil && member.StudentID != "" {
-		return context.Error(c, http.StatusBadRequest, "student_id already used", nil)
-	}
-
-	if err := m.AddOneFamilyMember(p); err != nil {
-		util.ErrorPrint(err, nil, "create new family member failed")
-		return context.Error(c, http.StatusInternalServerError, "insert in db failed", err)
-	}
-
-	return context.Success(c, p)
-}
-
-func DeleteOneFamilyMemberRequestHandler(c echo.Context) error {
-	m := model.GetModel()
-	defer m.Close()
-
-	studentID := c.QueryParam("student_id")
-
-	if err := m.DeleteOneFamilyMemberByStudentID(studentID); err != nil {
-		util.ErrorPrint(err, nil, "create new family member failed")
+	if err := m.CreateOneMusterByTitle(title); err != nil {
+		util.ErrorPrint(err, nil, "create new muster failed")
 		return context.Error(c, http.StatusInternalServerError, "insert in db failed", err)
 	}
 
 	return context.Success(c, nil)
 }
 
-func UpdateOneFamilyMemberRequestHandler(c echo.Context) error {
+func DeleteOneMusterByNameRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
-	studentID := c.QueryParam("student_id")
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
+	title := c.QueryParam("title")
+	if title == "" {
+		return context.Error(c, http.StatusBadRequest, "title cannot be empty", nil)
+	}
+
+	if err := m.DeleteOneMusterByTitle(title); err != nil {
+		util.ErrorPrint(err, nil, "delete muster failed")
+		return context.Error(c, http.StatusInternalServerError, "delete in db failed", err)
+	}
+
+	return context.Success(c, nil)
+}
+
+type nameString struct {
+	Name []string
+}
+
+func AddPersonsToOneMusterRequestHandler(c echo.Context) error {
+	m := model.GetModel()
+	defer m.Close()
+
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
+	title := c.QueryParam("title")
+	if title == "" {
+		return context.Error(c, http.StatusBadRequest, "title cannot be empty", nil)
+	}
 
 	var bodyBytes []byte
 	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
 	c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-	p := param.FamilyMember{}
+	p := nameString{}
 	if err := json.Unmarshal(bodyBytes, &p); err != nil {
-		util.ErrorPrint(err, nil, "unmarshal failed on updating family member")
+		util.ErrorPrint(err, nil, "unmarshal failed")
 		return context.Error(c, http.StatusBadRequest, "unmarshal failed", err)
 	}
 
-	if p.StudentID == "" {
-		util.ErrorPrint(nil, nil, "missing param student_id")
-		return context.Error(c, http.StatusBadRequest, "missing param student_id", nil)
-	}
-	if p.Name == "" {
-		util.ErrorPrint(nil, nil, "missing param name")
-		return context.Error(c, http.StatusBadRequest, "missing param name", nil)
-	}
-	if p.QQ == 0 {
-		util.ErrorPrint(nil, nil, "missing param qq")
-		return context.Error(c, http.StatusBadRequest, "missing param qq", nil)
+	ms, err := m.AddPersonsToOneMuster(title, p.Name)
+	if err != nil {
+		util.ErrorPrint(err, nil, "create muster failed")
+		return context.Error(c, http.StatusInternalServerError, "create in db failed", err)
 	}
 
-	member, err := m.GetOneFamilyMemberByStudentID(p.StudentID)
-	if err == nil && member.StudentID != "" {
-		return context.Error(c, http.StatusBadRequest, "student_id already used", nil)
+	return context.Success(c, ms)
+}
+
+func DeletePersonsOnOneMusterRequestHandler(c echo.Context) error {
+	m := model.GetModel()
+	defer m.Close()
+
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
 	}
 
-	if _, err := m.UpdateFamilyMemberByStudentID(studentID, p); err != nil {
-		util.ErrorPrint(err, nil, "update family member failed")
-		return context.Error(c, http.StatusInternalServerError, "insert in db failed", err)
+	title := c.QueryParam("title")
+	if title == "" {
+		return context.Error(c, http.StatusBadRequest, "title cannot be empty", nil)
 	}
 
-	return context.Success(c, p)
+	var bodyBytes []byte
+	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
+	c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	p := nameString{}
+	if err := json.Unmarshal(bodyBytes, &p); err != nil {
+		util.ErrorPrint(err, nil, "unmarshal failed")
+		return context.Error(c, http.StatusBadRequest, "unmarshal failed", err)
+	}
+
+	ms, err := m.DeletePersonsOnOneMuster(title, p.Name)
+	if err != nil {
+		util.ErrorPrint(err, nil, "delete muster failed")
+		return context.Error(c, http.StatusInternalServerError, "delete in db failed", err)
+	}
+
+	return context.Success(c, ms)
 }
