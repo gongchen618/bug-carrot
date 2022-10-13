@@ -16,6 +16,11 @@ func GetAllFamilyMembersRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
 	members, err := m.GetAllFamilyMember()
 	if err != nil {
 		util.ErrorPrint(err, nil, "get all family member failed")
@@ -28,6 +33,11 @@ func GetAllFamilyMembersRequestHandler(c echo.Context) error {
 func CreateOneFamilyMemberRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
+
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
 
 	var bodyBytes []byte
 	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
@@ -68,15 +78,23 @@ func CreateOneFamilyMemberRequestHandler(c echo.Context) error {
 	return context.Success(c, p)
 }
 
-func DeleteOneFamilyMemberRequestHandler(c echo.Context) error {
+func DeleteOneFamilyMemberByStudentIDRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
 	studentID := c.QueryParam("student_id")
+	if studentID == "" {
+		return context.Error(c, http.StatusBadRequest, "student_id cannot be empty", nil)
+	}
 
 	if err := m.DeleteOneFamilyMemberByStudentID(studentID); err != nil {
-		util.ErrorPrint(err, nil, "create new family member failed")
-		return context.Error(c, http.StatusInternalServerError, "insert in db failed", err)
+		util.ErrorPrint(err, nil, "delete family member failed")
+		return context.Error(c, http.StatusInternalServerError, "delete in db failed", err)
 	}
 
 	return context.Success(c, nil)
@@ -86,7 +104,15 @@ func UpdateOneFamilyMemberRequestHandler(c echo.Context) error {
 	m := model.GetModel()
 	defer m.Close()
 
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
 	studentID := c.QueryParam("student_id")
+	if studentID == "" {
+		return context.Error(c, http.StatusBadRequest, "student_id cannot be empty", nil)
+	}
 
 	var bodyBytes []byte
 	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
