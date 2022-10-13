@@ -30,6 +30,8 @@ var messages = []string{
 	"TODO清单",
 	"约定",
 	"这是一份约定",
+	"div1榜单",
+	"榜单div2",
 }
 
 func TestGetWordsFromString(t *testing.T) {
