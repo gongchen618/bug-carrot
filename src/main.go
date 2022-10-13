@@ -30,6 +30,8 @@ func main() {
 // 新插件需要在这里调用 Register 函数
 // 注意顺序
 func pluginRegister() {
+	//	plugin.CollectionPluginRegister() // 收集表
+	plugin.VjudgeRankPluginRegister() // vjudge榜单
 
 	plugin.HomeworkPluginRegister()   // 作业
 	plugin.SchedulePluginRegister()   // 任务清单
