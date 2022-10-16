@@ -2,10 +2,12 @@ package controller
 
 import (
 	"bug-carrot/model"
+	"bug-carrot/param"
 	"bug-carrot/util"
 	"bug-carrot/util/context"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"io/ioutil"
 	"net/http"
@@ -170,4 +172,58 @@ func UpdateOptionsOnOneBallotForMembersRequestHandler(c echo.Context) error {
 	}
 
 	return context.Success(c, bt)
+}
+
+func BroadCastMessageOnOneBallotForOptions(c echo.Context) error {
+	m := model.GetModel()
+	defer m.Close()
+
+	token := c.QueryParam("token")
+	if token != util.Token {
+		return context.Error(c, http.StatusUnauthorized, "wrong token", nil)
+	}
+
+	title := c.QueryParam("title")
+	if title == "" {
+		return context.Error(c, http.StatusBadRequest, "title cannot be empty", nil)
+	}
+
+	message := c.QueryParam("message")
+	type optionsString struct {
+		Options []string
+	}
+
+	var bodyBytes []byte
+	bodyBytes, _ = ioutil.ReadAll(c.Request().Body)
+	c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	p := optionsString{}
+	if err := json.Unmarshal(bodyBytes, &p); err != nil {
+		util.ErrorPrint(err, nil, "unmarshal failed")
+		return context.Error(c, http.StatusBadRequest, "unmarshal failed", err)
+	}
+
+	bt, err := m.GetOneBallotByTitle(title)
+	if err != nil {
+		return context.Error(c, http.StatusInternalServerError, "no ballot find", err)
+	}
+
+	var vis map[string]bool
+	for _, n := range p.Options {
+		vis[n] = true
+	}
+
+	var mb []param.MusterPerson
+	for _, member := range bt.TargetMember {
+		_, ok := vis[member.Option]
+		if ok {
+			mb = append(mb, member.Info)
+		}
+	}
+
+	failed := util.SendSameMessageToManyFriends(fmt.Sprintf("滋啦滋啦——卡洛收到了，希望你能填写【%s】的祈愿！\n\"%s\"", title, message), mb)
+	var failedName []string
+	for _, person := range failed {
+		failedName = append(failedName, person.Name)
+	}
+	return context.Success(c, failedName)
 }

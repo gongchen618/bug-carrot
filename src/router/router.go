@@ -36,4 +36,5 @@ func initBallotAPIRouter(g *echo.Group) {
 	g.POST("/option", controller.AddAnOptionToOneBallotRequestHandler)
 	g.DELETE("/option", controller.DeleteAnOptionOnOneBallotRequestHandler)
 	g.PUT("/member", controller.UpdateOptionsOnOneBallotForMembersRequestHandler)
+	g.POST("/member/broadcast", controller.BroadCastMessageOnOneBallotForOptions)
 }

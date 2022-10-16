@@ -7,6 +7,6 @@ type Ballot struct {
 }
 
 type BallotMember struct {
-	Name   MusterPerson `bson:"info" json:"info"`
+	Info   MusterPerson `bson:"info" json:"info"`
 	Option string       `bson:"option" json:"option"`
 }

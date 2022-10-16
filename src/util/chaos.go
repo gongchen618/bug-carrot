@@ -54,8 +54,12 @@ func getHitokotoSentence() hitokotoResponse {
 	return hitokotoResp
 }
 
-func getMessageChaosVersion(message string) string {
+func GetHitokotoWarpedMessage(message string) string {
 	hitokotoResp := getHitokotoSentence()
+	return fmt.Sprintf("「%s」\n%s\nfrom.%s", hitokotoResp.Hitokoto, message, hitokotoResp.From)
+}
+
+func getMessageChaosVersion(message string) string {
 	messageRune := []rune(message)
 	messageLen := len(messageRune)
 	for i := 0; i <= messageLen-1 && i <= messageLen/9; i++ {
@@ -68,7 +72,7 @@ func getMessageChaosVersion(message string) string {
 		}
 		messageRune[a.Int64()], messageRune[a.Int64()+1] = wordii, wordi
 	}
-	return fmt.Sprintf("「%s」\n%s\nfrom.%s", hitokotoResp.Hitokoto, string(messageRune), hitokotoResp.From)
+	return string(messageRune)
 }
 
 func getMessageLinkMixedVersion(message string) string {
@@ -87,15 +91,20 @@ func getMessageLinkMixedVersion(message string) string {
 }
 
 // SendSameMessageToManyFriends : 批量发送同一条消息，混淆汉字顺序和添加无关内容后不均匀延迟发送
-func SendSameMessageToManyFriends(message string, muster param.Muster) []param.MusterPerson {
+func SendSameMessageToManyFriends(message string, muster []param.MusterPerson) []param.MusterPerson {
 	var failed []param.MusterPerson
-	for _, person := range muster.People {
+	for _, person := range muster {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(10)))
 		if err != nil {
 			num = big.NewInt(1)
 		}
 		time.Sleep(time.Duration(num.Int64()) * time.Second)
-		status := QQSendAndFindWhetherSuccess(person.QQ, getMessageChaosVersion(message))
+
+		message = getMessageLinkMixedVersion(message)
+		message = getMessageChaosVersion(message)
+		message = GetHitokotoWarpedMessage(message)
+
+		status := QQSendAndFindWhetherSuccess(person.QQ, message)
 		if status == false {
 			failed = append(failed, person)
 		}
