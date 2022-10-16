@@ -124,23 +124,25 @@ func GetQQGroupUserId(msg param.GroupMessage) int64 {
 	return userId
 }
 
-var emojiInvalid map[int64]bool
+var (
+	emojiInvalid       map[int64]bool
+	emojiMessageString []string
+)
 
 // packageMessage 在消息后面增加一个随机表情
 func packageMessage(message string) string {
-	emoji, err := rand.Int(rand.Reader, big.NewInt(331))
-	if err != nil {
-		emoji = big.NewInt(0) // [惊讶]
-	} else {
-		invalid, exist := emojiInvalid[emoji.Int64()]
-		if exist && invalid {
-			emoji = big.NewInt(0) // [惊讶]
-		}
-	}
-	return fmt.Sprintf("%s[CQ:face,id=%d]", message, emoji)
+	return fmt.Sprintf("%s%s", message, GetRandomEmojiCQString())
 }
 
-func markInvalidEmoji() {
+func GetRandomEmojiCQString() string {
+	emoji, err := rand.Int(rand.Reader, big.NewInt(int64(len(emojiMessageString))))
+	if err != nil {
+		return "👻"
+	}
+	return emojiMessageString[emoji.Int64()]
+}
+
+func buildValidEmoji() {
 	emojiInvalid = make(map[int64]bool)
 	invalid := []int64{17,
 		40, 44, 45, 47, 48,
@@ -159,8 +161,24 @@ func markInvalidEmoji() {
 	for _, e := range invalid {
 		emojiInvalid[e] = true
 	}
+	for i := 0; i <= 340; i++ {
+		_, exist := emojiInvalid[int64(i)]
+		if exist {
+			continue
+		}
+		emojiMessageString = append(emojiMessageString, fmt.Sprintf("[CQ:face,id=%d]", i))
+	}
+
+	message := "🙈🙉🙊💘💔💯💤😁😂😃😄👿😉😊😌😍😏😒😓😔😖😘😚😜😝😞😠😡😢😣😥😨😪😭😰😱😲😳😷" +
+		"🙃😋😗😛🤑🤓😎🤗🙄🤔😩😤🤐🤒😴😀😆😅😇🙂😙😟😕🙁😫😶😐😑😯😦😧😮😵😬🤕😈👻\U0001F97A\U0001F974" +
+		"🤣\U0001F970🤩🤤🤫🤪🧐🤬🤧🤭🤠🤯🤥\U0001F973🤨🤢🤡🤮\U0001F975\U0001F976💩💀👽👾👺👹🤖😺" +
+		"😸😹😻😼😽🙀😿😾"
+	messageRune := []rune(message)
+	for i := range messageRune {
+		emojiMessageString = append(emojiMessageString, string(messageRune[i]))
+	}
 }
 
 func init() {
-	markInvalidEmoji()
+	buildValidEmoji()
 }
