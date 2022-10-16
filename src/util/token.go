@@ -13,6 +13,7 @@ var (
 )
 
 func init() {
+	return
 	rand.Seed(time.Now().UnixNano())
 
 	str := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

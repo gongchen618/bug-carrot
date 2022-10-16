@@ -5,7 +5,9 @@ import (
 	"bug-carrot/param"
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strconv"
@@ -30,6 +32,10 @@ func QQApproveFriendAddRequest(flag string) {
 	}
 }
 
+type qqSendResponse struct {
+	Status string `json:"status"`
+}
+
 // QQSend 接受 userId 和 message，并私聊发送
 // 如果不是好友，会发送失败
 func QQSend(userId int64, message string) {
@@ -49,6 +55,32 @@ func QQSend(userId int64, message string) {
 	if _, err = client.Do(req); err != nil {
 		ErrorPrint(err, userId, "message send")
 	}
+}
+
+func QQSendAndFindWhetherSuccess(userId int64, message string) bool {
+	sendMsgUrl := fmt.Sprintf("%s%s", config.C.QQBot.Host, "/send_private_msg")
+	req, err := http.NewRequest("POST", sendMsgUrl, bytes.NewBuffer(nil))
+	if err != nil {
+		ErrorPrint(err, userId, "message send")
+		return false
+	}
+
+	q := req.URL.Query()
+	q.Add("user_id", strconv.FormatInt(userId, 10))
+	q.Add("message", packageMessage(message))
+	req.URL.RawQuery = q.Encode()
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		ErrorPrint(err, userId, "message send")
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	qqSendResp := qqSendResponse{}
+	if err = json.Unmarshal(body, &qqSendResp); err != nil || qqSendResp.Status == "failed" {
+		return false
+	}
+	return true
 }
 
 // QQGroupSend 接受 groupId 和 message，并在对应群聊中发送

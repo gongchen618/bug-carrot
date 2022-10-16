@@ -11,6 +11,7 @@ func InitRouter(g *echo.Group) {
 
 	initFamilyAPIRouter(g.Group("/family"))
 	initMusterAPIRouter(g.Group("/muster"))
+	initBallotAPIRouter(g.Group("/ballot"))
 }
 
 func initFamilyAPIRouter(g *echo.Group) {
@@ -26,4 +27,13 @@ func initMusterAPIRouter(g *echo.Group) {
 	g.DELETE("", controller.DeleteOneMusterByNameRequestHandler)
 	g.POST("/people", controller.AddPersonsToOneMusterRequestHandler)
 	g.DELETE("/people", controller.DeletePersonsOnOneMusterRequestHandler)
+}
+
+func initBallotAPIRouter(g *echo.Group) {
+	g.GET("/all", controller.GetAllBallotRequestHandler)
+	g.POST("", controller.CreateOneBallotByTitleRequestHandler)
+	g.DELETE("", controller.DeleteOneBallotByTitleRequestHandler)
+	g.POST("/option", controller.AddAnOptionToOneBallotRequestHandler)
+	g.DELETE("/option", controller.DeleteAnOptionOnOneBallotRequestHandler)
+	g.PUT("/member", controller.UpdateOptionsOnOneBallotForMembersRequestHandler)
 }

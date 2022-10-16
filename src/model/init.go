@@ -12,6 +12,9 @@ type Model interface {
 	FoodInterface
 	ScheduleInterface
 	KeyWordInterface
+	FamilyInterface
+	MusterInterface
+	BallotInterface
 }
 
 type model struct {

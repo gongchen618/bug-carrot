@@ -93,7 +93,7 @@ func (m *model) AddPersonsToOneMuster(title string, name []string) (param.Muster
 		return ms, err
 	}
 
-	members := util.BuildFamilyMemberListFromNameList(name)
+	members := buildFamilyMemberListFromNameList(name)
 	var vis map[string]bool
 	for _, n := range ms.People {
 		vis[n.Name] = true
@@ -124,7 +124,7 @@ func (m *model) DeletePersonsOnOneMuster(title string, name []string) (param.Mus
 		return ms, err
 	}
 
-	members := util.BuildFamilyMemberListFromNameList(name)
+	members := buildFamilyMemberListFromNameList(name)
 	var vis map[string]bool
 	for _, n := range members {
 		vis[n.Name] = true
@@ -148,4 +148,29 @@ func (m *model) DeletePersonsOnOneMuster(title string, name []string) (param.Mus
 	}
 
 	return ms, nil
+}
+
+func buildFamilyMemberListFromNameList(name []string) []param.FamilyMember {
+	m := GetModel()
+	defer m.Close()
+
+	members, err := m.GetAllFamilyMember()
+	if err != nil {
+		util.ErrorPrint(errors.New("get all family member failed"), nil, "")
+		return nil
+	}
+
+	var vis map[string]bool
+	for _, n := range name {
+		vis[n] = true
+	}
+
+	var responseMembers []param.FamilyMember
+	for _, member := range members {
+		_, ok := vis[member.Name]
+		if ok {
+			responseMembers = append(responseMembers, member)
+		}
+	}
+	return responseMembers
 }

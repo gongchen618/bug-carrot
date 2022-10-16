@@ -11,6 +11,9 @@
 - [x] codeforces 未来比赛列表
 - [x] schedule 任务清单
 - [x] keyword 召唤(关键字)
+- [x] family 通讯录
+- [x] muster 名单
+- [x] ballot 投票 & 收集表
 
 ## Q&A
 
