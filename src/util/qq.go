@@ -74,6 +74,7 @@ func QQSendAndFindWhetherSuccess(userId int64, message string) bool {
 	resp, err := client.Do(req)
 	if err != nil {
 		ErrorPrint(err, userId, "message send")
+		return false
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 	qqSendResp := qqSendResponse{}

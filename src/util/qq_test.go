@@ -32,17 +32,18 @@ func TestSendSameMessageToManyFriends(t *testing.T) {
 	mus := param.Muster{
 		Title: "123",
 	}
-	mus.People = append(mus.People, param.MusterPerson{
+	mus.People = append(mus.People, param.PersonWithQQ{
 		Name: "name",
 		QQ:   config.C.Plugin.Homework.Admin,
 	})
 
-	mus.People = append(mus.People, param.MusterPerson{
+	mus.People = append(mus.People, param.PersonWithQQ{
 		Name: "name",
 		QQ:   1437342516,
 	})
 
-	SendSameMessageToManyFriends("作业来咯~你可接稳啦!\n【数电】(1)学习通\n【离散】(1)也是学习通\n【大物】(1)71-72\n【电路】(1)1-15,18,26,27,30\n【复变】(1)到练习十二", mus)
+	SendSameMessageToManyFriends("作业来咯~你可接稳啦!\n【数电】(1)学习通\n【离散】(1)也是学习通\n【大物】(1)71-72\n【电路】(1)1-15,18,26,27,30\n【复变】(1)到练习十二",
+		mus.People)
 }
 
 func TestRandomEmoji(t *testing.T) {

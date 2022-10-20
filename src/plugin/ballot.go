@@ -78,15 +78,16 @@ func (p *ballot) DoMatchedPrivate(msg param.PrivateMessage) error {
 
 	member, err := m.GetOneFamilyMemberByQQ(msg.UserId)
 	if err != nil {
-		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：身份认证失败，你是谁？"))
+		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：身份认证失败，你是...？"))
 		return nil
 	}
 
 	help := msg.ExistWord("v", []string{"帮助"})
 	if help {
 		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("\"填写 帮助\"：查看本消息\n"+
-			"\"填写 查询\"：查看当前收集\n"+
-			"\"填写 [title] [option]\"：填写名为 [title] 的收集，并选择 [option]"))
+			"\"填写 查看\"：查看当前未填写的收集\n"+
+			"\"填写 查看 all\"：查看当前所有收集"+
+			"\"填写 [title] [answer]\"：填写名为 [title] 的收集，答复为 [answer]"))
 		return nil
 	}
 
@@ -97,11 +98,16 @@ func (p *ballot) DoMatchedPrivate(msg param.PrivateMessage) error {
 			util.QQSend(msg.UserId, "FAILED：有某种不可抗力量抑制了卡洛的魔力！")
 			return nil
 		}
-		message := ""
+		message := "查询结果如下：\n"
+		flagAll := msg.ExistWord("eng", []string{"all"})
 		for _, bt := range allBallot {
 			for _, mb := range bt.TargetMember {
-				if mb.Info.QQ == msg.UserId {
-					message = fmt.Sprintf("%s你在【%s】中的选择为：%s选项包括：%s\n", message, bt.Title, mb.Option, bt.OfferedOptions)
+				if mb.People.QQ == msg.UserId && (mb.AnsweredFlag == false || flagAll) {
+					if mb.AnsweredFlag == false {
+						message = fmt.Sprintf("%s【%s】（未回复）\n备注：%s\n", message, bt.Title, bt.Remark)
+					} else {
+						message = fmt.Sprintf("%s【%s】回复：%s\n备注：%s\n", message, bt.Title, mb.Answer, bt.Remark)
+					}
 				}
 			}
 		}
@@ -111,28 +117,32 @@ func (p *ballot) DoMatchedPrivate(msg param.PrivateMessage) error {
 
 	word := strings.Split(msg.RawMessage, " ")
 
-	if len(word) == 3 {
+	if len(word) >= 3 {
 		bt, err := m.GetOneBallotByTitle(word[1])
-		vis := false
-		for _, option := range bt.OfferedOptions {
-			if option == word[2] {
-				vis = true
+		if err != nil {
+			util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage(fmt.Sprintf("FAILED：没有找到收集【%s】", word[1])))
+			return nil
+		}
+		visFlag := false
+		for _, person := range bt.TargetMember {
+			if person.People.QQ == msg.UserId {
+				visFlag = true
 			}
 		}
-		if err != nil || !vis {
-			util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：选择未成功，你的输入非法。"))
+		if visFlag == false {
+			util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage(fmt.Sprintf("FAILED：收集【%s】好像不需要你回答哦", word[1])))
 			return nil
 		}
-		_, err = m.UpdateOptionsOnOneBallotForMembers(word[1], word[2], []string{member.Name})
+		_, err = m.UpdateAnswerForOneMember(word[1], strings.Join(word[2:], " "), member.Name)
 		if err != nil {
-			util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：选择未成功，我的。"))
+			util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：没回复成功，我的。"))
 			return nil
 		}
-		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("ACCEPT: 选项已接收！"))
+		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("ACCEPT: 回答已接收！"))
 		return nil
 	}
 
-	util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：解析失败，你肯定又在说怪话了。"))
+	util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("FAILED：解析失败，你肯定又在说怪话了。\n没有的话，要不要问问我 \"填写 帮助\" 呢？"))
 	return nil
 }
 

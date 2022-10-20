@@ -91,14 +91,14 @@ func getMessageLinkMixedVersion(message string) string {
 }
 
 // SendSameMessageToManyFriends : 批量发送同一条消息，混淆汉字顺序和添加无关内容后不均匀延迟发送
-func SendSameMessageToManyFriends(message string, muster []param.MusterPerson) []param.MusterPerson {
-	var failed []param.MusterPerson
-	for _, person := range muster {
+func SendSameMessageToManyFriends(message string, people []param.PersonWithQQ) []param.PersonWithQQ {
+	var failed []param.PersonWithQQ
+	for _, person := range people {
 		num, err := rand.Int(rand.Reader, big.NewInt(int64(10)))
 		if err != nil {
 			num = big.NewInt(1)
 		}
-		time.Sleep(time.Duration(num.Int64()) * time.Second)
+		time.Sleep(time.Duration(num.Int64()))
 
 		message = getMessageLinkMixedVersion(message)
 		message = getMessageChaosVersion(message)

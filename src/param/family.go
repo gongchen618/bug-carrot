@@ -11,3 +11,8 @@ type FamilyMember struct {
 	Address   string    `bson:"address" json:"address"`
 	Birthday  time.Time `bson:"birthday" json:"birthday"`
 }
+
+type PersonWithQQ struct {
+	Name string `bson:"name" json:"name"`
+	QQ   int64  `bson:"qq" json:"qq"`
+}

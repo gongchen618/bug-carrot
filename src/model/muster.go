@@ -101,7 +101,7 @@ func (m *model) AddPersonsToOneMuster(title string, name []string) (param.Muster
 	for _, member := range members {
 		_, ok := vis[member.Name]
 		if !ok {
-			ms.People = append(ms.People, param.MusterPerson{
+			ms.People = append(ms.People, param.PersonWithQQ{
 				Name: member.Name,
 				QQ:   member.QQ,
 			})
@@ -130,11 +130,11 @@ func (m *model) DeletePersonsOnOneMuster(title string, name []string) (param.Mus
 		vis[n.Name] = true
 	}
 
-	var newPeople []param.MusterPerson
+	var newPeople []param.PersonWithQQ
 	for _, member := range ms.People {
 		_, ok := vis[member.Name]
 		if !ok {
-			newPeople = append(newPeople, param.MusterPerson{
+			newPeople = append(newPeople, param.PersonWithQQ{
 				Name: member.Name,
 				QQ:   member.QQ,
 			})

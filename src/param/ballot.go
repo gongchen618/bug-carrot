@@ -1,12 +1,13 @@
 package param
 
 type Ballot struct {
-	Title          string         `bson:"title" json:"title"`
-	OfferedOptions []string       `bson:"offered_options" json:"offered_options"`
-	TargetMember   []BallotMember `bson:"target_member" json:"target_member"`
+	Title        string         `bson:"title" json:"title"`
+	Remark       string         `bson:"remark" json:"remark"`
+	TargetMember []BallotMember `bson:"target_member" json:"target_member"`
 }
 
 type BallotMember struct {
-	Info   MusterPerson `bson:"info" json:"info"`
-	Option string       `bson:"option" json:"option"`
+	People       PersonWithQQ `bson:"people" json:"people"`
+	AnsweredFlag bool         `bson:"answered_flag" json:"answered_flag"`
+	Answer       string       `bson:"answer" json:"answer"`
 }

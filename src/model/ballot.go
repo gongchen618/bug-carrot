@@ -11,17 +11,18 @@ import (
 const ballotCollectionName = "ballot"
 
 func (m *model) ballotCollection() *mongo.Collection {
+
 	return m.database.Collection(ballotCollectionName)
 }
 
 type BallotInterface interface {
 	GetAllBallot() ([]param.Ballot, error)
 	GetOneBallotByTitle(title string) (param.Ballot, error)
-	CreateOneBallotByTitle(title string, muster param.Muster, defaultOption string) error
+	CreateOneBallotByTitle(title string, muster param.Muster, remark string) error
 	DeleteOneBallotByTitle(title string) error
-	AddAnOptionToOneBallot(title string, option string) (param.Ballot, error)
-	DeleteAnOptionOnOneBallot(title string, option string) (param.Ballot, error)
-	UpdateOptionsOnOneBallotForMembers(title string, option string, name []string) (param.Ballot, error)
+	//AddAnOptionToOneBallot(title string, option string) (param.Ballot, error)
+	//DeleteAnOptionOnOneBallot(title string, option string) (param.Ballot, error)
+	UpdateAnswerForOneMember(title string, answer string, name string) (param.BallotMember, error)
 }
 
 func (m *model) GetAllBallot() ([]param.Ballot, error) {
@@ -48,14 +49,15 @@ func (m *model) GetOneBallotByTitle(title string) (param.Ballot, error) {
 	return ms, nil
 }
 
-func (m *model) CreateOneBallotByTitle(title string, muster param.Muster, defaultOption string) error {
+func (m *model) CreateOneBallotByTitle(title string, muster param.Muster, remark string) error {
 	bt := param.Ballot{
-		Title: title,
+		Title:  title,
+		Remark: remark,
 	}
 	for _, member := range muster.People {
 		bt.TargetMember = append(bt.TargetMember, param.BallotMember{
-			Info:   member,
-			Option: defaultOption,
+			People:       member,
+			AnsweredFlag: false,
 		})
 	}
 
@@ -91,70 +93,69 @@ func (m *model) DeleteOneBallotByTitle(title string) error {
 	return nil
 }
 
-func (m *model) AddAnOptionToOneBallot(title string, option string) (param.Ballot, error) {
+//func (m *model) AddAnOptionToOneBallot(title string, option string) (param.Ballot, error) {
+//	var bt param.Ballot
+//	filter := bson.M{"title": bson.M{"$eq": title}}
+//	err := m.ballotCollection().FindOne(m.context, filter).Decode(&bt)
+//	if err != nil {
+//		return bt, err
+//	}
+//
+//	bt.OfferedOptions = append(bt.OfferedOptions, option)
+//	err = m.ballotCollection().FindOneAndReplace(m.context, filter, bt).Decode(&bt)
+//	if err != nil {
+//		return param.Ballot{}, err
+//	}
+//
+//	return bt, nil
+//}
+//
+//func (m *model) DeleteAnOptionOnOneBallot(title string, option string) (param.Ballot, error) {
+//	var bt param.Ballot
+//	filter := bson.M{"title": bson.M{"$eq": title}}
+//	err := m.ballotCollection().FindOne(m.context, filter).Decode(&bt)
+//	if err != nil {
+//		return bt, err
+//	}
+//
+//	var newOptions []string
+//	for _, opt := range bt.OfferedOptions {
+//		if opt != option {
+//			newOptions = append(newOptions, opt)
+//		}
+//	}
+//	bt.OfferedOptions = newOptions
+//	err = m.ballotCollection().FindOneAndReplace(m.context, filter, bt).Decode(&bt)
+//	if err != nil {
+//		return param.Ballot{}, err
+//	}
+//
+//	return bt, nil
+//}
+
+func (m *model) UpdateAnswerForOneMember(title string, answer string, name string) (param.BallotMember, error) {
 	var bt param.Ballot
+	updatedBallotMember := param.BallotMember{}
+
 	filter := bson.M{"title": bson.M{"$eq": title}}
 	err := m.ballotCollection().FindOne(m.context, filter).Decode(&bt)
 	if err != nil {
-		return bt, err
-	}
-
-	bt.OfferedOptions = append(bt.OfferedOptions, option)
-	err = m.ballotCollection().FindOneAndReplace(m.context, filter, bt).Decode(&bt)
-	if err != nil {
-		return param.Ballot{}, err
-	}
-
-	return bt, nil
-}
-
-func (m *model) DeleteAnOptionOnOneBallot(title string, option string) (param.Ballot, error) {
-	var bt param.Ballot
-	filter := bson.M{"title": bson.M{"$eq": title}}
-	err := m.ballotCollection().FindOne(m.context, filter).Decode(&bt)
-	if err != nil {
-		return bt, err
-	}
-
-	var newOptions []string
-	for _, opt := range bt.OfferedOptions {
-		if opt != option {
-			newOptions = append(newOptions, opt)
-		}
-	}
-	bt.OfferedOptions = newOptions
-	err = m.ballotCollection().FindOneAndReplace(m.context, filter, bt).Decode(&bt)
-	if err != nil {
-		return param.Ballot{}, err
-	}
-
-	return bt, nil
-}
-
-func (m *model) UpdateOptionsOnOneBallotForMembers(title string, option string, name []string) (param.Ballot, error) {
-	var bt param.Ballot
-	filter := bson.M{"title": bson.M{"$eq": title}}
-	err := m.ballotCollection().FindOne(m.context, filter).Decode(&bt)
-	if err != nil {
-		return bt, err
-	}
-
-	var vis map[string]bool
-	for _, p := range name {
-		vis[p] = true
+		return param.BallotMember{}, err
 	}
 
 	for _, member := range bt.TargetMember {
-		_, ok := vis[member.Info.Name]
-		if ok {
-			member.Option = option
+		if member.People.Name == name {
+			member.AnsweredFlag = true
+			member.Answer = answer
+			updatedBallotMember = member
+			break
 		}
 	}
 
-	err = m.ballotCollection().FindOneAndReplace(m.context, filter, bt).Decode(&bt)
+	_, err = m.ballotCollection().ReplaceOne(m.context, filter, bt)
 	if err != nil {
-		return param.Ballot{}, err
+		return param.BallotMember{}, err
 	}
 
-	return bt, nil
+	return updatedBallotMember, nil
 }

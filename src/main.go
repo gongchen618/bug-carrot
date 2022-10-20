@@ -6,6 +6,7 @@ import (
 	"bug-carrot/plugin"
 	"bug-carrot/router"
 	"fmt"
+	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"os"
 	"os/signal"
@@ -21,6 +22,8 @@ func main() {
 
 	pluginRegister()
 	go controller.WorkTimePlugins()
+
+	e.Use(middleware.CORS())
 
 	go signalWaiter()
 	log.Fatal(e.Start(config.C.App.Addr))
