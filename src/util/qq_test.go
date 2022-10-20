@@ -76,3 +76,19 @@ func TestGetRankString(t *testing.T) {
 	ans := GetRankString("518528")
 	fmt.Println(ans)
 }
+
+//func TestRun(t *testing.T) {
+//
+//	timer := time.NewTimer(time.Duration(10))
+//	for {
+//		num, err := rand.Int(rand.Reader, big.NewInt(int64(20)))
+//		if err != nil {
+//			num = big.NewInt(20)
+//		}
+//		timer.Reset(time.Second * time.Duration(num.Int64())) // 这里复用了 timer
+//		select {
+//		case <-timer.C:
+//			fmt.Println("每隔若干秒执行一次")
+//		}
+//	}
+//}

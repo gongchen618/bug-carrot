@@ -143,12 +143,13 @@ func (m *model) UpdateAnswerForOneMember(title string, answer string, name strin
 		return param.BallotMember{}, err
 	}
 
-	for _, member := range bt.TargetMember {
+	for i, member := range bt.TargetMember {
 		if member.People.Name == name {
-			member.AnsweredFlag = true
-			member.Answer = answer
-			updatedBallotMember = member
-			break
+			bt.TargetMember[i] = param.BallotMember{
+				People:       member.People,
+				AnsweredFlag: true,
+				Answer:       answer,
+			}
 		}
 	}
 

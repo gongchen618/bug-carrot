@@ -86,12 +86,12 @@ func (p *ballot) DoMatchedPrivate(msg param.PrivateMessage) error {
 	if help {
 		util.QQSend(msg.UserId, util.GetHitokotoWarpedMessage("\"填写 帮助\"：查看本消息\n"+
 			"\"填写 查看\"：查看当前未填写的收集\n"+
-			"\"填写 查看 all\"：查看当前所有收集"+
+			"\"填写 查看 all\"：查看当前所有收集\n"+
 			"\"填写 [title] [answer]\"：填写名为 [title] 的收集，答复为 [answer]"))
 		return nil
 	}
 
-	ask := msg.ExistWord("v", []string{"查询"})
+	ask := msg.ExistWord("v", []string{"查看"})
 	if ask {
 		allBallot, err := m.GetAllBallot()
 		if err != nil {
