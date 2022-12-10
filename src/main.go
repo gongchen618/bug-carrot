@@ -23,7 +23,7 @@ func main() {
 	pluginRegister()
 	go controller.WorkTimePlugins()
 
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORS()) //*
 
 	go signalWaiter()
 	log.Fatal(e.Start(config.C.App.Addr))
@@ -33,8 +33,8 @@ func main() {
 // 新插件需要在这里调用 Register 函数
 // 注意顺序
 func pluginRegister() {
-	plugin.BallotPluginRegister()     //收集表
-	plugin.VjudgeRankPluginRegister() // vjudge榜单
+	//plugin.BallotPluginRegister()     //收集表
+	//plugin.VjudgeRankPluginRegister() // vjudge榜单
 
 	plugin.HomeworkPluginRegister()   // 作业
 	plugin.SchedulePluginRegister()   // 任务清单

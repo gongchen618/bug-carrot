@@ -7,9 +7,6 @@ app: # 与 bot 的通信配置，无需修改
   prefix: "/api"
 mongodb: # 数据库配置，当 database-use 设置为 false 时无需关注
   host: "127.0.0.1"
-  username: "carrot"
-  password: "123"
-  database: "carrot"
 qqbot: # QQBot 配置
   name: "middleware" # 修改为你的 QQBot 账号名(匹配 @ 前缀时使用)
   host: "http://127.0.0.1:5701"

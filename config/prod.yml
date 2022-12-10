@@ -4,9 +4,6 @@ app:
   prefix: "/api"
 mongodb:
   host: "127.0.0.1"
-  username: "carrot"
-  password: "123"
-  database: "carrot"
 qqbot:
   name: "卡洛塔"
   host: "http://127.0.0.1:5700"
